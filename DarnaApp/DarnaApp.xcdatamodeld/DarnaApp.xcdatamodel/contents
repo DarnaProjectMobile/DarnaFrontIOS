@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
+    <entity name="Item" representedClassName="Item" syncable="YES" codeGenerationType="class">
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <entity name="Visit" representedClassName="VisitEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="propertyId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="propertyTitle" optional="NO" attributeType="String"/>
+        <attribute name="tenantId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="tenantName" optional="NO" attributeType="String"/>
+        <attribute name="tenantEmail" optional="NO" attributeType="String"/>
+        <attribute name="ownerId" optional="NO" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="ownerName" optional="NO" attributeType="String"/>
+        <attribute name="ownerEmail" optional="NO" attributeType="String"/>
+        <attribute name="scheduledDate" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="status" optional="NO" attributeType="String" defaultValueString="pending"/>
+        <attribute name="proposedAlternativeDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
+        <attribute name="rating" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="review" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="NO" attributeType="Date" usesScalarValueType="NO" defaultValueString="now"/>
+        <attribute name="reminderSent" optional="YES" attributeType="Boolean" usesScalarValueType="YES" defaultValueString="NO"/>
+    </entity>
+    <elements>
+        <element name="Item" positionX="-63" positionY="-18" width="128" height="44"/>
+        <element name="Visit" positionX="-54" positionY="9" width="128" height="298"/>
+    </elements>
+</model>
