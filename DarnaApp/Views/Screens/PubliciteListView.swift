@@ -4,7 +4,7 @@
 //
 
 import SwiftUI
-
+	
 struct PubliciteListView: View {
     @StateObject private var viewModel = PubliciteViewModel()
     @State private var showCreate = false
