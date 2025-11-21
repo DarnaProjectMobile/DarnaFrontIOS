@@ -7,351 +7,310 @@ import SwiftUI
 
 struct PropertyDetailPage: View {
     let property: Property
-    @State private var selectedTab = 0
     
-    // Review fields
-    @State private var rating: Int = 0
-    @State private var reviewText: String = ""
-    @State private var showConfirmation = false
+    @State private var selectedTab: DetailTab = .details
+    
+    private enum DetailTab: Int, CaseIterable {
+        case details, tour, photos
+        
+        var title: String {
+            switch self {
+            case .details: return "Details"
+            case .tour: return "Visite 360°"
+            case .photos: return "Photos"
+            }
+        }
+        
+        var icon: String {
+            switch self {
+            case .details: return "doc.text.fill"
+            case .tour: return "eye.fill"
+            case .photos: return "camera.fill"
+            }
+        }
+    }
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                
-                // MARK: - Header Image
-                ZStack(alignment: .bottomLeading) {
-                    LinearGradient(
-                        colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .frame(height: 250)
-                    .overlay(
-                        Image(systemName: "house.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.white.opacity(0.7))
-                    )
-                    
-                    if property.has360Tour {
-                        Button {
-                            // 360° tour action
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "eye.fill")
-                                Text("Visite 360°")
-                            }
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(AppTheme.primary)
-                            .cornerRadius(8)
-                        }
-                        .padding(12)
-                    }
-                }
-                
-                // MARK: - Title and Location
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(property.title)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(AppTheme.textPrimary)
-                    
-                    HStack(spacing: 12) {
-                        Label(property.location ?? "Localisation non précisée", systemImage: "mappin.circle.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(AppTheme.textSecondary)
-                        Label("\(property.flatmatesCount) colocataires", systemImage: "person.2.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(AppTheme.textSecondary)
-                    }
-                }
-                .padding(20)
-                
-                // MARK: - Tabs
-                HStack(spacing: 0) {
-                    TabButton(title: "Passeport", icon: "person.text.rectangle.fill", isSelected: selectedTab == 0) { selectedTab = 0 }
-                    TabButton(title: "Visite 360°", icon: "eye.fill", isSelected: selectedTab == 1) { selectedTab = 1 }
-                    TabButton(title: "Photos", icon: "camera.fill", isSelected: selectedTab == 2) { selectedTab = 2 }
-                    TabButton(title: "Quartier", icon: "map.fill", isSelected: selectedTab == 3) { selectedTab = 3 }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-                
-                Divider().padding(.horizontal, 20)
-                
-                // MARK: - Tab Content
-                VStack(alignment: .leading, spacing: 24) {
-                    switch selectedTab {
-                    case 0: passportContent
-                    case 1: placeholder(icon: "eye.fill", title: "Visite 360°", message: "La visite 360° sera disponible prochainement.")
-                    case 2: placeholder(icon: "camera.fill", title: "Photos", message: "Les photos seront disponibles prochainement.")
-                    default: placeholder(icon: "map.fill", title: "Quartier", message: "Les informations sur le quartier seront disponibles prochainement.")
-                    }
-                }
-                .padding(20)
-                
-                // MARK: - Review Section
-                reviewSection
+            VStack(spacing: 24) {
+                headerSection
+                tabSelector
+                tabContent
+                contactButton
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
         }
+        .background(AppTheme.background.ignoresSafeArea())
         .navigationTitle("Détails")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    // Share action
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .foregroundColor(AppTheme.primary)
-                }
-            }
-        }
-        .alert("Merci pour votre avis !", isPresented: $showConfirmation) {
-            Button("OK", role: .cancel) {}
-        }
     }
     
-    // MARK: - Passport Content
-    private var passportContent: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            // Les 3 mots
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Les 3 Mots de la Coloc")
-                    .font(.system(size: 20, weight: .bold))
+    // MARK: - Header
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Image("house")
+                .resizable()
+                .scaledToFill()
+                .frame(height: 220)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .cornerRadius(24)
+                .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 6)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text(property.location?.isEmpty == false ? property.location! : property.title)
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundColor(AppTheme.textPrimary)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(property.tags, id: \.self) { tag in
-                            Text(tag)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .background(LinearGradient(colors: [.purple, .pink], startPoint: .leading, endPoint: .trailing))
-                                .cornerRadius(20)
-                        }
-                    }
-                }
-            }
-            
-            // Carte du logement
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Carte d'identité du Logement")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(AppTheme.textPrimary)
-                
-                VStack(spacing: 16) {
-                    PropertyInfoCard(title: property.calmLevel,
-                                     description: property.calmLevelDescription,
-                                     icon: "theatermasks.fill",
-                                     iconColors: [.yellow, .blue])
-                    PropertyInfoCard(title: property.lifestyle,
-                                     description: property.lifestyleDescription,
-                                     icon: "frying.pan.fill",
-                                     iconColors: [.purple, .yellow])
-                    PropertyInfoCard(title: property.homeEnergy,
-                                     description: property.homeEnergyDescription,
-                                     icon: "rocket.fill",
-                                     iconColors: [.red, .orange])
-                }
-            }
-            
-            // Description
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Description")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(AppTheme.textPrimary)
-                Text(property.description ?? "Aucune description disponible")
-                    .font(.system(size: 16))
+                Text(property.type ?? "Type non spécifié")
+                    .font(.system(size: 15))
                     .foregroundColor(AppTheme.textSecondary)
+                    .lineLimit(2)
             }
             
-            // Rental Details
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Loyer mensuel")
-                        .foregroundColor(AppTheme.textSecondary)
-                    HStack {
-                        Image(systemName: "eurosign.circle.fill")
-                        Text("\(Int(property.price))€")
-                            .font(.system(size: 22, weight: .bold))
-                    }
-                }
+            HStack(spacing: 16) {
+                Label("3 colocataires", systemImage: "person.3.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(AppTheme.textSecondary)
+                
                 Spacer()
-                VStack(alignment: .trailing) {
-                    Text("Disponibilité")
-                        .foregroundColor(AppTheme.textSecondary)
-                    HStack {
-                        Image(systemName: "calendar")
-                        Text(property.availability.isEmpty ? "Non spécifiée" : property.availability)
-                            .font(.system(size: 16, weight: .semibold))
-                    }
-                }
             }
-            .padding()
-            .background(Color.gray.opacity(0.05))
-            .cornerRadius(12)
             
-            Button {
-                // navigate to chat later
-            } label: {
-                Text("Contacter les Colocataires")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .background(LinearGradient(colors: [.purple, .pink], startPoint: .leading, endPoint: .trailing))
-                    .cornerRadius(12)
+            capsuleToolbar
+        }
+    }
+    
+    private var capsuleToolbar: some View {
+        HStack(spacing: 12) {
+            CapsuleButton(title: "Details", isSelected: selectedTab == .details) {
+                selectedTab = .details
+            }
+            CapsuleButton(title: "Visite 360°", isSelected: selectedTab == .tour) {
+                selectedTab = .tour
+            }
+            CapsuleButton(title: "Photos", isSelected: selectedTab == .photos) {
+                selectedTab = .photos
+            }
+        }
+        .padding(6)
+        .background(Color.white)
+        .cornerRadius(30)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
+    
+    private var tabSelector: some View {
+        EmptyView()
+    }
+    
+    // MARK: - Tab Content
+    private var tabContent: some View {
+        Group {
+            switch selectedTab {
+            case .details:
+                detailsTab
+            case .tour:
+                placeholder(
+                    icon: "eye.fill",
+                    title: "Visite 360°",
+                    message: "La visite 360° sera bientôt disponible."
+                )
+            case .photos:
+                photosTab
             }
         }
     }
     
-    // MARK: - Placeholder Tab
+    private var detailsTab: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            tagsSection
+            identityCards
+            descriptionSection
+            rentalInfo
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 6)
+    }
+    
+    private var tagsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Les 3 mots de la coloc")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(AppTheme.textPrimary)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(displayedTags, id: \.self) { tag in
+                        Text(tag)
+                            .font(.system(size: 14, weight: .bold))
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 8)
+                            .background(
+                                LinearGradient(colors: [Color.purple, Color.pink], startPoint: .leading, endPoint: .trailing)
+                            )
+                            .cornerRadius(20)
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var displayedTags: [String] {
+        if property.tags.isEmpty {
+            return ["Artistique", "Foodie", "Festif"]
+        }
+        return Array(property.tags.prefix(3))
+    }
+    
+    private var identityCards: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Carte d'identité du logement")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(AppTheme.textPrimary)
+            
+            VStack(spacing: 12) {
+                PropertyInfoCard(
+                    title: property.calmLevel.isEmpty ? "Niveau de Calme" : property.calmLevel,
+                    description: property.calmLevelDescription.isEmpty ? "Ça dépend du mood" : property.calmLevelDescription,
+                    icon: "theatermasks.fill",
+                    iconColors: [.yellow, .blue]
+                )
+                
+                PropertyInfoCard(
+                    title: property.lifestyle.isEmpty ? "Style de Vie" : property.lifestyle,
+                    description: property.lifestyleDescription.isEmpty ? "Cuisine ensemble" : property.lifestyleDescription,
+                    icon: "fork.knife",
+                    iconColors: [.purple, .pink]
+                )
+                
+                PropertyInfoCard(
+                    title: property.homeEnergy.isEmpty ? "Énergie du Foyer" : property.homeEnergy,
+                    description: property.homeEnergyDescription.isEmpty ? "Très actif" : property.homeEnergyDescription,
+                    icon: "bolt.fill",
+                    iconColors: [.orange, .red]
+                )
+            }
+        }
+    }
+    
+    private var descriptionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Description")
+                .font(.system(size: 18, weight: .semibold))
+            Text(property.description ?? "Aucune description disponible.")
+                .font(.system(size: 15))
+                .foregroundColor(AppTheme.textSecondary)
+        }
+    }
+    
+    private var rentalInfo: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Loyer mensuel")
+                    .font(.caption)
+                    .foregroundColor(AppTheme.textSecondary)
+                Text("\(Int(property.price))DT")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(AppTheme.primary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Disponible")
+                    .font(.caption)
+                    .foregroundColor(AppTheme.textSecondary)
+                Text(availabilityLabel)
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding()
+        .background(Color.gray.opacity(0.08))
+        .cornerRadius(16)
+    }
+    
+    private var photosTab: some View {
+        VStack(spacing: 16) {
+            Text("Photos du logement")
+                .font(.system(size: 18, weight: .semibold))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Image("house")
+                .resizable()
+                .scaledToFill()
+                .frame(height: 220)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .cornerRadius(20)
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 6)
+    }
+    
+    private var contactButton: some View {
+        Button {
+            // Empty action for now
+        } label: {
+            Text("Contacter les Colocataires")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(colors: [.purple, .pink], startPoint: .leading, endPoint: .trailing)
+                )
+                .cornerRadius(16)
+        }
+    }
+    
     private func placeholder(icon: String, title: String, message: String) -> some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 60))
+                .font(.system(size: 48))
                 .foregroundColor(AppTheme.primary.opacity(0.5))
-            Text(title).font(.system(size: 20, weight: .semibold))
+            Text(title)
+                .font(.system(size: 18, weight: .semibold))
             Text(message)
                 .font(.system(size: 14))
                 .foregroundColor(AppTheme.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 60)
-    }
-    
-    // MARK: - Review Section
-    private var reviewSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Avis et notes")
-                .font(.system(size: 22, weight: .bold))
-                .padding(.horizontal, 20)
-            
-            // Average Rating
-            HStack(spacing: 8) {
-                ForEach(1...5, id: \.self) { star in
-                    Image(systemName: "star.fill")
-                        .foregroundColor(star <= 4 ? .yellow : .gray.opacity(0.3))
-                }
-                Text("4.0")
-                    .font(.system(size: 20, weight: .semibold))
-            }
-            .padding(.horizontal, 20)
-            
-            // Filters
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(["Tous", "5★", "4★", "3★", "2★", "1★"], id: \.self) { f in
-                        Text(f)
-                            .font(.system(size: 14, weight: .medium))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(16)
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-            
-            // Preview review
-            VStack(alignment: .leading, spacing: 8) {
-                Text("⭐️⭐️⭐️⭐️⭐️  |  Amine B.")
-                    .font(.system(size: 14, weight: .semibold))
-                Text("Appartement très calme et bien situé. Propriétaire très accueillant !")
-                    .font(.system(size: 14))
-                    .foregroundColor(AppTheme.textSecondary)
-                    .lineLimit(2)
-            }
-            .padding()
-            .background(Color.gray.opacity(0.05))
-            .cornerRadius(12)
-            .padding(.horizontal, 20)
-            
-            // Navigate to all reviews
-            NavigationLink(destination: ReviewsPage(property: property)) {
-                Text("Voir tous les avis")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(AppTheme.primary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(12)
-                    .padding(.horizontal, 20)
-            }
-            
-            Divider().padding(.horizontal, 20)
-            
-            // Leave a review
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Laissez un avis")
-                    .font(.system(size: 20, weight: .bold))
-                    .padding(.horizontal, 20)
-                
-                HStack {
-                    ForEach(1...5, id: \.self) { star in
-                        Image(systemName: star <= rating ? "star.fill" : "star")
-                            .font(.system(size: 30))
-                            .foregroundColor(star <= rating ? .yellow : .gray.opacity(0.4))
-                            .onTapGesture { rating = star }
-                    }
-                }
-                .padding(.horizontal, 20)
-                
-                TextEditor(text: $reviewText)
-                    .frame(height: 100)
-                    .padding(10)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(12)
-                    .padding(.horizontal, 20)
-                
-                Button {
-                    guard rating > 0, !reviewText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                    showConfirmation = true
-                    reviewText = ""
-                    rating = 0
-                } label: {
-                    Text("Publier mon avis")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(AppTheme.primary)
-                        .cornerRadius(12)
-                        .padding(.horizontal, 20)
-                }
-            }
-            .padding(.bottom, 30)
-        }
+        .padding(40)
         .background(Color.white)
         .cornerRadius(24)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        .padding(.horizontal, 16)
-        .padding(.top, 30)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 6)
+    }
+    
+    private var availabilityLabel: String {
+        if let startDate = property.startDate {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            return formatter.string(from: startDate)
+        }
+        return "Début novembre"
     }
 }
 
-// MARK: - Tab Button
-struct TabButton: View {
+private struct CapsuleButton: View {
     let title: String
-    let icon: String
     let isSelected: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                Text(title)
-                    .font(.system(size: 12, weight: .medium))
-            }
-            .foregroundColor(isSelected ? AppTheme.primary : AppTheme.textSecondary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(isSelected ? AppTheme.primaryLight : Color.clear)
-            .cornerRadius(12)
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isSelected ? AppTheme.onPrimary : AppTheme.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(isSelected ? AppTheme.primary : Color.clear)
+                .cornerRadius(20)
         }
     }
 }

@@ -8,10 +8,9 @@ import Foundation
 final class PropertyService {
     static let shared = PropertyService()
     private init() {}
-
+    
     // ✅ Centralized server URL — replace with your machine’s IP
-    private let baseURL = "http://172.20.10.2:3000"
-
+    private let baseURL = "http://10.61.177.155:3000"
     // MARK: - Fetch all properties
     func fetchProperties() async throws -> [Property] {
         guard let url = URL(string: "\(baseURL)/annonces") else {
@@ -26,7 +25,7 @@ final class PropertyService {
         let token = await MainActor.run {
             AuthenticationManager.shared.authToken
         }
-        if let token {
+        if let token {  
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
 
@@ -60,19 +59,18 @@ final class PropertyService {
                         type: String,
                         startDate: Date,
                         endDate: Date,
-                        imageUrl: String?) async throws -> Property {
+                        images: [String],
+                        nbrCollocateurMax: Int,
+                        nbrCollocateurActuel: Int = 0) async throws -> Property {
         guard let url = URL(string: "\(baseURL)/annonces") else {
             throw NetworkError.invalidURL
         }
 
-        let (user, token) = await MainActor.run {
-            (
-                AuthenticationManager.shared.currentUser,
-                AuthenticationManager.shared.authToken
-            )
+        let token = await MainActor.run {
+            AuthenticationManager.shared.authToken
         }
 
-        guard let user else {
+        guard token != nil else {
             throw NetworkError.unauthorized
         }
 
@@ -87,21 +85,21 @@ final class PropertyService {
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
-        // ✅ Match backend field names
-        let body: [String: Any?] = [
+        // ✅ Match backend CreateAnnonceDto structure
+        let body: [String: Any] = [
             "title": title,
             "description": description,
             "price": price,
-            "user": user.id,
-            "image": imageUrl,
-            "type": type,
             "location": location,
+            "type": type,
+            "images": images,
+            "nbrCollocateurMax": nbrCollocateurMax,
+            "nbrCollocateurActuel": nbrCollocateurActuel,
             "startDate": isoFormatter.string(from: startDate),
             "endDate": isoFormatter.string(from: endDate)
         ]
 
-        let sanitized = body.compactMapValues { $0 }
-        request.httpBody = try JSONSerialization.data(withJSONObject: sanitized)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -137,23 +135,26 @@ final class PropertyService {
 
     // MARK: - Update property
     func updateProperty(id: String,
-                        title: String,
-                        description: String,
-                        price: Double,
-                        location: String,
-                        type: String,
-                        startDate: Date,
-                        endDate: Date,
-                        imageUrl: String?) async throws -> Property {
+                        title: String? = nil,
+                        description: String? = nil,
+                        price: Double? = nil,
+                        location: String? = nil,
+                        type: String? = nil,
+                        startDate: Date? = nil,
+                        endDate: Date? = nil,
+                        images: [String]? = nil,
+                        nbrCollocateurMax: Int? = nil,
+                        nbrCollocateurActuel: Int? = nil) async throws -> Property {
         guard let url = URL(string: "\(baseURL)/annonces/\(id)") else {
             throw NetworkError.invalidURL
         }
         
-        let (_, token) = await MainActor.run {
-            (
-                AuthenticationManager.shared.currentUser,
-                AuthenticationManager.shared.authToken
-            )
+        let token = await MainActor.run {
+            AuthenticationManager.shared.authToken
+        }
+        
+        guard token != nil else {
+            throw NetworkError.unauthorized
         }
         
         var request = URLRequest(url: url)
@@ -166,19 +167,20 @@ final class PropertyService {
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        let body: [String: Any?] = [
-            "title": title,
-            "description": description,
-            "price": price,
-            "location": location,
-            "type": type,
-            "startDate": isoFormatter.string(from: startDate),
-            "endDate": isoFormatter.string(from: endDate),
-            "image": imageUrl
-        ]
+        // Build body with only provided fields (partial update like UpdateAnnonceDto)
+        var body: [String: Any] = [:]
+        if let title = title { body["title"] = title }
+        if let description = description { body["description"] = description }
+        if let price = price { body["price"] = price }
+        if let location = location { body["location"] = location }
+        if let type = type { body["type"] = type }
+        if let images = images { body["images"] = images }
+        if let nbrCollocateurMax = nbrCollocateurMax { body["nbrCollocateurMax"] = nbrCollocateurMax }
+        if let nbrCollocateurActuel = nbrCollocateurActuel { body["nbrCollocateurActuel"] = nbrCollocateurActuel }
+        if let startDate = startDate { body["startDate"] = isoFormatter.string(from: startDate) }
+        if let endDate = endDate { body["endDate"] = isoFormatter.string(from: endDate) }
         
-        let sanitized = body.compactMapValues { $0 }
-        request.httpBody = try JSONSerialization.data(withJSONObject: sanitized)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -233,6 +235,38 @@ final class PropertyService {
         guard (200..<300).contains(httpResponse.statusCode) else {
             let message = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
             throw NetworkError.serverError("Suppression impossible : \(message)")
+        }
+    }
+    
+    // MARK: - Fetch single property by ID
+    func fetchProperty(id: String) async throws -> Property {
+        guard let url = URL(string: "\(baseURL)/annonces/\(id)") else {
+            throw NetworkError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+
+        if !(200..<300).contains(httpResponse.statusCode) {
+            print("❌ Fetch property failed with status:", httpResponse.statusCode)
+            print("📦 Response body:", String(data: data, encoding: .utf8) ?? "nil")
+            throw NetworkError.invalidResponse
+        }
+
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(Property.self, from: data)
+        } catch {
+            print("❌ Decode error:", error)
+            throw NetworkError.decodingError
         }
     }
 }

@@ -33,8 +33,7 @@ enum NetworkError: Error, LocalizedError {
 final class NetworkService {
     static let shared = NetworkService()
     
-    // ✅ Change this IP if your local server changes
-    private let baseURL = "http://172.20.10.2:3000"
+    private let baseURL = "http://10.61.177.155:3000"
     
     private init() {}
     

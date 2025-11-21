@@ -11,165 +11,128 @@ struct PropertyCardView: View {
     var onEdit: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
     
+    @State private var isFavorite = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
+            // Image section – same image for all cards
+            ZStack {
+                AppTheme.primaryLight
+                Image("house")
+                    .resizable()
+                    .scaledToFill()
+            }
+            .frame(height: 160)
+            .frame(maxWidth: .infinity)
+            .clipped()
+            .cornerRadius(12)
+            
+            // Title and price
+            VStack(alignment: .leading, spacing: 4) {
                 Text(property.title)
-                    .font(.headline)
+                    .font(.title3.weight(.semibold))
                     .foregroundColor(AppTheme.textPrimary)
-                Spacer()
-                Text(String(format: "%.0f DT", property.price))
-                    .font(.subheadline).bold()
+                    .lineLimit(2)
+                
+                Text(formattedPrice)
+                    .font(.headline)
                     .foregroundColor(AppTheme.primary)
             }
             
+            // Description
             if let description = property.description, !description.isEmpty {
                 Text(description)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(AppTheme.textSecondary)
                     .lineLimit(3)
             }
             
-            if let location = property.location, !location.isEmpty {
-                HStack(spacing: 6) {
-                    Image(systemName: "mappin.and.ellipse")
-                        .font(.caption)
-                        .foregroundColor(AppTheme.primary)
-                    Text(location)
-                        .font(.caption)
-                        .foregroundColor(AppTheme.textSecondary)
-                }
-            }
-            
-            if !property.tags.isEmpty {
-                FlowLayout(tags: property.tags)
-            }
-            
-            if let createdAt = property.createdAt {
+            // Start date (date début)
+            if let startDate = property.startDate {
                 HStack(spacing: 6) {
                     Image(systemName: "calendar")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(AppTheme.textSecondary)
-                    Text(createdAt.formatted(date: .abbreviated, time: .shortened))
-                        .font(.caption2)
+                    Text("Disponible début \(formatDate(startDate))")
+                        .font(.caption)
                         .foregroundColor(AppTheme.textSecondary)
                 }
             }
-
-            if canManage {
-                HStack(spacing: 12) {
-                    Button {
-                        onEdit?()
-                    } label: {
-                        Label("Modifier", systemImage: "pencil")
-                            .font(.caption)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(AppTheme.primary.opacity(0.12))
-                            .foregroundColor(AppTheme.primary)
-                            .clipShape(Capsule())
-                    }
-                    
-                    Button(role: .destructive) {
-                        onDelete?()
-                    } label: {
-                        Label("Supprimer", systemImage: "trash.fill")
-                            .font(.caption)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.red.opacity(0.12))
-                            .foregroundColor(.red)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
+            
+            // Owner + actions row
+            footerRow
         }
         .padding(16)
         .background(AppTheme.card)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
     }
-}
-
-private struct FlowLayout: View {
-    let tags: [String]
     
-    var body: some View {
-        FlexibleView(
-            availableWidth: UIScreen.main.bounds.width - 64,
-            data: tags,
-            spacing: 8,
-            alignment: .leading
-        ) { tag in
-            Text(tag)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(AppTheme.primaryLight)
-                .foregroundColor(AppTheme.primary)
-                .clipShape(Capsule())
-        }
+    // MARK: - Helpers
+    
+    private var formattedPrice: String {
+        // Example: "650 DT/mois"
+        let priceString = String(format: "%.0f", property.price)
+        return "\(priceString) DT/mois"
     }
-}
-
-private struct FlexibleView<Data: RandomAccessCollection, Content: View>: View where Data.Element: Hashable {
-    let availableWidth: CGFloat
-    let data: Data
-    let spacing: CGFloat
-    let alignment: HorizontalAlignment
-    let content: (Data.Element) -> Content
     
-    @State private var elementsSize: [Data.Element: CGSize] = [:]
+    private var ownerLabel: String {
+        property.ownerName ?? property.user ?? "Non spécifié"
+    }
     
-    var body: some View {
-        VStack(alignment: alignment, spacing: spacing) {
-            ForEach(computeRows(), id: \.self) { rowElements in
-                HStack(spacing: spacing) {
-                    ForEach(rowElements, id: \.self) { element in
-                        content(element)
-                            .fixedSize()
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear
-                                        .preference(key: SizePreferenceKey.self, value: geometry.size)
-                                }
-                            )
-                            .onPreferenceChange(SizePreferenceKey.self) { size in
-                                elementsSize[element] = size
-                            }
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
+    }
+    
+    private var footerRow: some View {
+        HStack(spacing: 12) {
+            Button {
+                isFavorite.toggle()
+            } label: {
+                Image(systemName: isFavorite ? "heart.fill" : "heart")
+                    .font(.subheadline)
+                    .foregroundColor(isFavorite ? .red : AppTheme.textSecondary)
+                    .padding(8)
+                    .background(AppTheme.primaryLight.opacity(0.5))
+                    .clipShape(Circle())
+            }
+            
+            Text("Propriétaire: \(ownerLabel)")
+                .font(.caption)
+                .foregroundColor(AppTheme.textSecondary)
+                .lineLimit(1)
+            
+            Spacer()
+            
+            if canManage {
+                HStack(spacing: 8) {
+                    Button {
+                        onEdit?()
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.caption)
+                            .padding(6)
+                            .background(AppTheme.primary.opacity(0.12))
+                            .foregroundColor(AppTheme.primary)
+                            .clipShape(Circle())
+                    }
+                    
+                    Button(role: .destructive) {
+                        onDelete?()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                            .padding(6)
+                            .background(Color.red.opacity(0.12))
+                            .foregroundColor(.red)
+                            .clipShape(Circle())
                     }
                 }
             }
         }
-    }
-    
-    private func computeRows() -> [[Data.Element]] {
-        var rows: [[Data.Element]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        
-        for element in data {
-            let elementSize = elementsSize[element, default: .zero]
-            let elementWidth = elementSize.width + spacing
-            
-            if currentRowWidth + elementWidth > availableWidth {
-                rows.append([element])
-                currentRowWidth = elementWidth
-            } else {
-                rows[rows.count - 1].append(element)
-                currentRowWidth += elementWidth
-            }
-        }
-        
-        return rows
-    }
-}
-
-private struct SizePreferenceKey: PreferenceKey {
-    static var defaultValue: CGSize = .zero
-    
-    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
-        // no-op
     }
 }
 
