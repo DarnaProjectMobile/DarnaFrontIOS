@@ -158,7 +158,7 @@ struct LoginPage: View {
             .navigationDestination(isPresented: $navigateToRegister) {
                 CreateAccountPage()
             }
-            .navigationDestination(isPresented: $navigateToMainApp) {
+            .fullScreenCover(isPresented: $navigateToMainApp) {
                 MainAppView()
             }
         }

@@ -6,9 +6,17 @@
 import SwiftUI
 
 struct PropertyDetailPage: View {
-    let property: Property
+    @State private var property: Property
     
     @State private var selectedTab: DetailTab = .details
+    @State private var rating = 0
+    @State private var reviewText = ""
+    @State private var showConfirmation = false
+    @State private var showBookingPage = false
+    
+    init(property: Property) {
+        _property = State(initialValue: property)
+    }
     
     private enum DetailTab: Int, CaseIterable {
         case details, tour, photos
@@ -37,6 +45,7 @@ struct PropertyDetailPage: View {
                 tabSelector
                 tabContent
                 contactButton
+                reviewSection
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 32)
@@ -44,14 +53,17 @@ struct PropertyDetailPage: View {
         .background(AppTheme.background.ignoresSafeArea())
         .navigationTitle("Détails")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Avis publié", isPresented: $showConfirmation) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Votre avis a été publié avec succès.")
+        }
     }
     
     // MARK: - Header
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Image("house")
-                .resizable()
-                .scaledToFill()
+            PropertyImageView(imageString: property.image)
                 .frame(height: 220)
                 .frame(maxWidth: .infinity)
                 .clipped()
@@ -69,12 +81,16 @@ struct PropertyDetailPage: View {
                     .lineLimit(2)
             }
             
-            HStack(spacing: 16) {
-                Label("3 colocataires", systemImage: "person.3.fill")
+            VStack(alignment: .leading, spacing: 8) {
+                if let location = property.location, !location.isEmpty {
+                    Label(location, systemImage: "location.fill")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppTheme.textSecondary)
+                }
+                
+                Label(colocatairesLabel, systemImage: "person.3.fill")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(AppTheme.textSecondary)
-                
-                Spacer()
             }
             
             capsuleToolbar
@@ -238,13 +254,30 @@ struct PropertyDetailPage: View {
                 .font(.system(size: 18, weight: .semibold))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Image("house")
-                .resizable()
-                .scaledToFill()
-                .frame(height: 220)
+            if let images = property.images, !images.isEmpty {
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                        ForEach(images, id: \.self) { imageString in
+                            PropertyImageView(imageString: imageString)
+                                .frame(height: 200)
+                                .frame(maxWidth: .infinity)
+                                .clipped()
+                                .cornerRadius(16)
+                        }
+                    }
+                }
+            } else {
+                VStack(spacing: 16) {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.system(size: 48))
+                        .foregroundColor(AppTheme.textSecondary.opacity(0.5))
+                    Text("Aucune photo disponible")
+                        .font(.system(size: 16))
+                        .foregroundColor(AppTheme.textSecondary)
+                }
                 .frame(maxWidth: .infinity)
-                .clipped()
-                .cornerRadius(20)
+                .frame(height: 220)
+            }
         }
         .padding(20)
         .background(Color.white)
@@ -254,7 +287,7 @@ struct PropertyDetailPage: View {
     
     private var contactButton: some View {
         Button {
-            // Empty action for now
+            showBookingPage = true
         } label: {
             Text("Contacter les Colocataires")
                 .font(.system(size: 18, weight: .semibold))
@@ -265,6 +298,11 @@ struct PropertyDetailPage: View {
                     LinearGradient(colors: [.purple, .pink], startPoint: .leading, endPoint: .trailing)
                 )
                 .cornerRadius(16)
+        }
+        .sheet(isPresented: $showBookingPage) {
+            BookPropertyPage(property: property) { updatedProperty in
+                property = updatedProperty
+            }
         }
     }
     
@@ -287,13 +325,129 @@ struct PropertyDetailPage: View {
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 6)
     }
     
+    private var colocatairesLabel: String {
+        let actuel = property.nbrCollocateurActuel ?? 0
+        let max = property.nbrCollocateurMax ?? 0
+        return "\(actuel)/\(max) colocataires"
+    }
+    
     private var availabilityLabel: String {
         if let startDate = property.startDate {
             let formatter = DateFormatter()
             formatter.dateStyle = .medium
+            formatter.locale = Locale(identifier: "fr_FR")
             return formatter.string(from: startDate)
         }
-        return "Début novembre"
+        return "Disponibilité non spécifiée"
+    }
+    
+    // MARK: - Review Section
+    private var reviewSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Avis et notes")
+                .font(.system(size: 22, weight: .bold))
+                .padding(.horizontal, 20)
+            
+            // Average Rating
+            HStack(spacing: 8) {
+                ForEach(1...5, id: \.self) { star in
+                    Image(systemName: "star.fill")
+                        .foregroundColor(star <= 4 ? .yellow : .gray.opacity(0.3))
+                }
+                Text("4.0")
+                    .font(.system(size: 20, weight: .semibold))
+            }
+            .padding(.horizontal, 20)
+            
+            // Filters
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(["Tous", "5★", "4★", "3★", "2★", "1★"], id: \.self) { f in
+                        Text(f)
+                            .font(.system(size: 14, weight: .medium))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(16)
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            
+            // Preview review
+            VStack(alignment: .leading, spacing: 8) {
+                Text("⭐️⭐️⭐️⭐️⭐️  |  Amine B.")
+                    .font(.system(size: 14, weight: .semibold))
+                Text("Appartement très calme et bien situé. Propriétaire très accueillant !")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppTheme.textSecondary)
+                    .lineLimit(2)
+            }
+            .padding()
+            .background(Color.gray.opacity(0.05))
+            .cornerRadius(12)
+            .padding(.horizontal, 20)
+            
+            // Navigate to all reviews
+            NavigationLink(destination: ReviewsPage(property: property)) {
+                Text("Voir tous les avis")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(AppTheme.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .padding(.horizontal, 20)
+            }
+            
+            Divider().padding(.horizontal, 20)
+            
+            // Leave a review
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Laissez un avis")
+                    .font(.system(size: 20, weight: .bold))
+                    .padding(.horizontal, 20)
+                
+                HStack {
+                    ForEach(1...5, id: \.self) { star in
+                        Image(systemName: star <= rating ? "star.fill" : "star")
+                            .font(.system(size: 30))
+                            .foregroundColor(star <= rating ? .yellow : .gray.opacity(0.4))
+                            .onTapGesture { rating = star }
+                    }
+                }
+                .padding(.horizontal, 20)
+                
+                TextEditor(text: $reviewText)
+                    .frame(height: 100)
+                    .padding(10)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(12)
+                    .padding(.horizontal, 20)
+                
+                Button {
+                    guard rating > 0, !reviewText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                    showConfirmation = true
+                    reviewText = ""
+                    rating = 0
+                } label: {
+                    Text("Publier mon avis")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(AppTheme.primary)
+                        .cornerRadius(12)
+                        .padding(.horizontal, 20)
+                }
+            }
+            .padding(.bottom, 30)
+        }
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .padding(.horizontal, 16)
+        .padding(.top, 30)
     }
 }
 

@@ -8,11 +8,11 @@ import SwiftUI
 struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showSettings = false
-    @State private var navigateToLogin = false
     @State private var showLogoutAlert = false
     
     // Observe the current user from AuthenticationManager
     @StateObject private var authManager = AuthenticationManager.shared
+    @StateObject private var favoritesManager = FavoritesManager.shared
 
     var body: some View {
         NavigationStack {
@@ -89,7 +89,19 @@ struct ProfileView: View {
                                 StatCard(icon: "star.fill", title: "Avis", value: "12")
                             }
                             
-                            StatCard(icon: "heart.fill", title: "Favoris", value: "8")
+                            NavigationLink(destination: FavoritesView()) {
+                                StatCard(icon: "heart.fill", title: "Favoris", value: "\(favoritesManager.getFavoritePropertyIds().count)")
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // MARK: - Reservations Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            SectionHeader(title: "Les réservations")
+                            
+                            NavigationLink(destination: MyReservationsView()) {
+                                ProfileRow(icon: "calendar.badge.clock", title: "Les réservations")
+                            }
                         }
                         .padding(.horizontal)
                         
@@ -134,11 +146,6 @@ struct ProfileView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar(.hidden, for: .navigationBar)
             
-            // Navigate to login page after logout
-            .navigationDestination(isPresented: $navigateToLogin) {
-                LoginPage()
-            }
-            
             // Logout confirmation alert
             .alert("Se déconnecter", isPresented: $showLogoutAlert) {
                 Button("Annuler", role: .cancel) {}
@@ -154,8 +161,9 @@ struct ProfileView: View {
     @MainActor
     private func handleLogout() {
         Task {
-            await AuthenticationManager.shared.signOut()
-            navigateToLogin = true
+            AuthenticationManager.shared.signOut()
+            // Post notification to dismiss MainAppView
+            NotificationCenter.default.post(name: .shouldDismissMainApp, object: nil)
         }
     }
 }

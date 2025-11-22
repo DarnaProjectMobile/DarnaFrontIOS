@@ -20,7 +20,14 @@ struct HomePage: View {
     @State private var showFilterSheet = false
     @State private var minPrice: Double? = nil
     @State private var maxPrice: Double? = nil
+    @State private var ownershipFilter: OwnershipFilter = .all
     @FocusState private var isSearchFocused: Bool
+    
+    private enum OwnershipFilter {
+        case all
+        case mine
+        case notMine
+    }
 
     var currentUserRole: String {
         authManager.currentUser?.role ?? "guest"
@@ -37,6 +44,7 @@ struct HomePage: View {
 
                 VStack(spacing: 16) {
                     searchAndFilterBar
+                    quickFilterButtons
                     
                     if isLoading {
                         ProgressView("Chargement des annonces...")
@@ -64,20 +72,21 @@ struct HomePage: View {
                         ScrollView {
                             LazyVStack(spacing: 20) {
                                 ForEach(filteredProperties) { property in
-                                    PropertyCardView(
-                                        property: property,
-                                        canManage: canManage(property: property),
-                                        onEdit: {
-                                            editingProperty = property
-                                        },
-                                        onDelete: {
-                                            propertyPendingDeletion = property
-                                        }
-                                    )
-                                    .padding(.horizontal, 16)
-                                    .onTapGesture {
-                                        navigationPath.append(property)
+                                    NavigationLink(value: property) {
+                                        PropertyCardView(
+                                            property: property,
+                                            canManage: canManage(property: property),
+                                            onEdit: {
+                                                editingProperty = property
+                                            },
+                                            onDelete: {
+                                                propertyPendingDeletion = property
+                                            }
+                                        )
                                     }
+                                    .buttonStyle(.plain)
+                                    .contentShape(Rectangle())
+                                    .padding(.horizontal, 16)
                                 }
                             }
                             .padding(.top, 8)
@@ -196,7 +205,17 @@ struct HomePage: View {
                 matchesMaxPrice = true
             }
             
-            return matchesSearch && matchesMinPrice && matchesMaxPrice
+            let matchesOwnership: Bool
+            switch ownershipFilter {
+            case .all:
+                matchesOwnership = true
+            case .mine:
+                matchesOwnership = property.user == currentUserId
+            case .notMine:
+                matchesOwnership = property.user != currentUserId
+            }
+            
+            return matchesSearch && matchesMinPrice && matchesMaxPrice && matchesOwnership
         }
     }
     
@@ -242,6 +261,56 @@ struct HomePage: View {
             }
         }
         .padding(.horizontal, 16)
+    }
+    
+    private var quickFilterButtons: some View {
+        HStack(spacing: 12) {
+            OwnershipFilterButton(
+                title: "Mes annonces",
+                isSelected: ownershipFilter == .mine,
+                icon: "person.fill"
+            ) {
+                ownershipFilter = ownershipFilter == .mine ? .all : .mine
+                applyFilters()
+            }
+            
+            OwnershipFilterButton(
+                title: "Non possédé par moi",
+                isSelected: ownershipFilter == .notMine,
+                icon: "person.2.fill"
+            ) {
+                ownershipFilter = ownershipFilter == .notMine ? .all : .notMine
+                applyFilters()
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+private struct OwnershipFilterButton: View {
+    let title: String
+    let isSelected: Bool
+    let icon: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .medium))
+                Text(title)
+                    .font(.system(size: 14, weight: .medium))
+            }
+            .foregroundColor(isSelected ? AppTheme.onPrimary : AppTheme.textPrimary)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(isSelected ? AppTheme.primary : AppTheme.card)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.clear : Color.gray.opacity(0.2), lineWidth: 1)
+            )
+        }
     }
 }
 

@@ -4,9 +4,11 @@
 //
 
 import SwiftUI
+import Combine
 
 struct MainAppView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
     @State private var selectedTab = 0
     
     var body: some View {
@@ -27,11 +29,11 @@ struct MainAppView: View {
                 .tag(1)
             
             // 📅 Visits
-            VisitManagementView()
-                .tabItem {
-                    Label("Visites", systemImage: "calendar")
-                }
-                .tag(2)
+          //  VisitManagementView()
+           //     .tabItem {
+           //         Label("Visites", systemImage: "calendar")
+           //     }
+           //     .tag(2)
             
             // 👤 Profile
             ProfileView()
@@ -41,5 +43,8 @@ struct MainAppView: View {
                 .tag(3)
         }
         .accentColor(.blue)
+        .onReceive(NotificationCenter.default.publisher(for: .shouldDismissMainApp)) { _ in
+            dismiss()
+        }
     }
 }

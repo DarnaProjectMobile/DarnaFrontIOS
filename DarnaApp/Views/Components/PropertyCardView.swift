@@ -11,16 +11,15 @@ struct PropertyCardView: View {
     var onEdit: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
     
+    @StateObject private var favoritesManager = FavoritesManager.shared
     @State private var isFavorite = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Image section – same image for all cards
+            // Image section
             ZStack {
                 AppTheme.primaryLight
-                Image("house")
-                    .resizable()
-                    .scaledToFill()
+                PropertyImageView(imageString: property.image)
             }
             .frame(height: 160)
             .frame(maxWidth: .infinity)
@@ -66,6 +65,12 @@ struct PropertyCardView: View {
         .background(AppTheme.card)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+        .onAppear {
+            isFavorite = favoritesManager.isFavorite(propertyId: property.id)
+        }
+        .onChange(of: favoritesManager.favoritePropertyIds) { _ in
+            isFavorite = favoritesManager.isFavorite(propertyId: property.id)
+        }
     }
     
     // MARK: - Helpers
@@ -90,7 +95,7 @@ struct PropertyCardView: View {
     private var footerRow: some View {
         HStack(spacing: 12) {
             Button {
-                isFavorite.toggle()
+                favoritesManager.toggleFavorite(propertyId: property.id)
             } label: {
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
                     .font(.subheadline)
@@ -99,6 +104,7 @@ struct PropertyCardView: View {
                     .background(AppTheme.primaryLight.opacity(0.5))
                     .clipShape(Circle())
             }
+            .buttonStyle(.plain)
             
             Text("Propriétaire: \(ownerLabel)")
                 .font(.caption)
@@ -119,6 +125,7 @@ struct PropertyCardView: View {
                             .foregroundColor(AppTheme.primary)
                             .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     
                     Button(role: .destructive) {
                         onDelete?()
@@ -130,6 +137,7 @@ struct PropertyCardView: View {
                             .foregroundColor(.red)
                             .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
