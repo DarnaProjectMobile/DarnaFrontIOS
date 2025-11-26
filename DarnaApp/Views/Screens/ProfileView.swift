@@ -97,10 +97,14 @@ struct ProfileView: View {
                         
                         // MARK: - Reservations Section
                         VStack(alignment: .leading, spacing: 12) {
-                            SectionHeader(title: "Les réservations")
+                            SectionHeader(title: "Gestion des réservations")
                             
                             NavigationLink(destination: MyReservationsView()) {
-                                ProfileRow(icon: "calendar.badge.clock", title: "Les réservations")
+                                ProfileRow(icon: "clock.badge.questionmark", title: "Demandes en attente")
+                            }
+                            
+                            NavigationLink(destination: AcceptedClientsView()) {
+                                ProfileRow(icon: "person.crop.circle.badge.checkmark", title: "Clients acceptés")
                             }
                         }
                         .padding(.horizontal)

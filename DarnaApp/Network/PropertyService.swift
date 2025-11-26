@@ -452,20 +452,92 @@ final class PropertyService {
             // Decode property first
             let property = try decoder.decode(Property.self, from: data)
             
-            // Parse bookings from JSON
+            // Parse bookings and attendingListBookings from JSON
             var bookings: [Booking] = []
-            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let bookingsArray = json["bookings"] as? [[String: Any]] {
-                for bookingDict in bookingsArray {
-                    if let bookingData = try? JSONSerialization.data(withJSONObject: bookingDict) {
-                        if let booking = try? decoder.decode(Booking.self, from: bookingData) {
-                            bookings.append(booking)
+            var attendingListBookings: [Booking] = []
+            
+            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                // Parse confirmed bookings
+                if let bookingsArray = json["bookings"] as? [[String: Any]] {
+                    for bookingDict in bookingsArray {
+                        if let bookingData = try? JSONSerialization.data(withJSONObject: bookingDict) {
+                            if let booking = try? decoder.decode(Booking.self, from: bookingData) {
+                                bookings.append(booking)
+                            }
+                        }
+                    }
+                }
+                
+                // Parse pending bookings (attendingListBookings)
+                if let attendingArray = json["attendingListBookings"] as? [[String: Any]] {
+                    for bookingDict in attendingArray {
+                        if let bookingData = try? JSONSerialization.data(withJSONObject: bookingDict) {
+                            if let booking = try? decoder.decode(Booking.self, from: bookingData) {
+                                attendingListBookings.append(booking)
+                            }
                         }
                     }
                 }
             }
             
-            return PropertyWithBookings(property: property, bookings: bookings)
+            return PropertyWithBookings(
+                property: property,
+                bookings: bookings,
+                attendingListBookings: attendingListBookings
+            )
+        } catch {
+            print("❌ Decode error:", error)
+            throw NetworkError.decodingError
+        }
+    }
+    
+    // MARK: - Respond to booking (Accept/Reject)
+    func respondToBooking(annonceId: String, bookingId: String, accept: Bool) async throws -> Property {
+        guard let url = URL(string: "\(baseURL)/annonces/\(annonceId)/booking/\(bookingId)/respond?accept=\(accept)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let token = await MainActor.run {
+            AuthenticationManager.shared.authToken
+        }
+        
+        guard token != nil else {
+            throw NetworkError.unauthorized
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if let token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+        
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            let serverMessage = String(data: data, encoding: .utf8) ?? "No response body"
+            print("❌ Respond to booking failed:")
+            print("📡 Status:", httpResponse.statusCode)
+            print("📦 Server says:", serverMessage)
+            
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let message = json["message"] {
+                throw NetworkError.serverError(String(describing: message))
+            }
+            throw NetworkError.invalidResponse
+        }
+        
+        do {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let property = try decoder.decode(Property.self, from: data)
+            print("✅ Booking \(accept ? "accepted" : "rejected") successfully")
+            return property
         } catch {
             print("❌ Decode error:", error)
             throw NetworkError.decodingError

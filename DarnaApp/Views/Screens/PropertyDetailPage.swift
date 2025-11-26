@@ -71,7 +71,7 @@ struct PropertyDetailPage: View {
                 .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 6)
             
             VStack(alignment: .leading, spacing: 8) {
-                Text(property.location?.isEmpty == false ? property.location! : property.title)
+                Text(property.title)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(AppTheme.textPrimary)
                 

@@ -32,11 +32,12 @@ struct AddPropertyFormView: View {
             ScrollView {
                 VStack(spacing: 24) {
 
-                    TextField("Titre de l’annonce", text: $title)
+                    // Title field → saves as "title" in database
+                    TextField("Titre de l'annonce", text: $title)
                         .textFieldStyle(CustomTextFieldStyle())
 
-                    TextField("Localisation", text: $location)
-                        .textFieldStyle(CustomTextFieldStyle())
+                    // Map-based location picker
+                    InlineMapLocationPicker(location: $location)
 
                     TextField("Prix (DT)", text: $price)
                         .keyboardType(.decimalPad)

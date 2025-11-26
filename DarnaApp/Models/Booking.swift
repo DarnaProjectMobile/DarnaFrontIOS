@@ -99,6 +99,13 @@ struct BookingUser: Codable {
 
 struct PropertyWithBookings {
     let property: Property
-    let bookings: [Booking]
+    let bookings: [Booking]  // Confirmed bookings
+    let attendingListBookings: [Booking]  // Pending bookings waiting for approval
+    
+    init(property: Property, bookings: [Booking], attendingListBookings: [Booking] = []) {
+        self.property = property
+        self.bookings = bookings
+        self.attendingListBookings = attendingListBookings
+    }
 }
 

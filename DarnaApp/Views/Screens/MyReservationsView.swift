@@ -62,7 +62,7 @@ struct MyReservationsView: View {
                     }
                 }
             }
-            .navigationTitle("Mes réservations")
+            .navigationTitle("Demandes en attente")
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 await loadProperties()
