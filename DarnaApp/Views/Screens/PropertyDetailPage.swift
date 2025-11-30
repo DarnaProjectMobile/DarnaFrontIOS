@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct PropertyDetailPage: View {
     @State private var property: Property
@@ -12,6 +13,8 @@ struct PropertyDetailPage: View {
     @State private var rating = 0
     @State private var reviewText = ""
     @State private var showConfirmation = false
+    @State private var reviews: [Review] = []
+    @State private var isLoadingReviews = false
     @State private var showBookingPage = false
     
     init(property: Property) {
@@ -341,6 +344,75 @@ struct PropertyDetailPage: View {
         return "Disponibilité non spécifiée"
     }
     
+    // MARK: - Reviews Helper Methods
+    
+    private var averageRating: Double {
+        guard !reviews.isEmpty else { return 0 }
+        let sum = reviews.reduce(0) { $0 + $1.rating }
+        return Double(sum) / Double(reviews.count)
+    }
+    
+    private var recentReviews: [Review] {
+        return reviews.sorted { $0.date > $1.date }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale(identifier: "fr_FR")
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+    
+    private func loadReviews() {
+        Task {
+            await MainActor.run {
+                isLoadingReviews = true
+            }
+            
+            do {
+                let fetchedReviews = try await ReviewService.shared.fetchReviews(for: property.id)
+                await MainActor.run {
+                    reviews = fetchedReviews
+                    isLoadingReviews = false
+                }
+            } catch {
+                print("Error loading reviews: \(error.localizedDescription)")
+                await MainActor.run {
+                    isLoadingReviews = false
+                }
+            }
+        }
+    }
+    
+    private func publishReview() {
+        guard rating > 0, !reviewText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        
+        Task {
+            do {
+                // In a real implementation, you would get the current user's name
+                let currentUser = AuthenticationManager.shared.currentUser
+                let userName = currentUser?.username ?? "Utilisateur"
+                
+                let newReview = try await ReviewService.shared.createReview(
+                    propertyId: property.id,
+                    rating: rating,
+                    comment: reviewText
+                )
+                
+                await MainActor.run {
+                    reviews.append(newReview)
+                    showConfirmation = true
+                    reviewText = ""
+                    rating = 0
+                }
+            } catch {
+                print("Error publishing review: \(error.localizedDescription)")
+                await MainActor.run {
+                    showConfirmation = true // Still show confirmation but with error message
+                }
+            }
+        }
+    }
+    
     // MARK: - Review Section
     private var reviewSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -350,11 +422,11 @@ struct PropertyDetailPage: View {
             
             // Average Rating
             HStack(spacing: 8) {
-                ForEach(1...5, id: \.self) { star in
+                ForEach(1...5, id: \.\self) { star in
                     Image(systemName: "star.fill")
-                        .foregroundColor(star <= 4 ? .yellow : .gray.opacity(0.3))
+                        .foregroundColor(star <= averageRating ? .yellow : .gray.opacity(0.3))
                 }
-                Text("4.0")
+                Text(String(format: "%.1f", averageRating))
                     .font(.system(size: 20, weight: .semibold))
             }
             .padding(.horizontal, 20)
@@ -374,19 +446,45 @@ struct PropertyDetailPage: View {
                 .padding(.horizontal, 20)
             }
             
-            // Preview review
-            VStack(alignment: .leading, spacing: 8) {
-                Text("⭐️⭐️⭐️⭐️⭐️  |  Amine B.")
-                    .font(.system(size: 14, weight: .semibold))
-                Text("Appartement très calme et bien situé. Propriétaire très accueillant !")
-                    .font(.system(size: 14))
-                    .foregroundColor(AppTheme.textSecondary)
-                    .lineLimit(2)
+            // Preview reviews (limited to 3 most recent)
+            ForEach(recentReviews.prefix(3)) { review in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 2) {
+                        ForEach(1...5, id: \.\self) { star in
+                            Image(systemName: star <= review.rating ? "star.fill" : "star")
+                                .foregroundColor(star <= review.rating ? .yellow : .gray.opacity(0.3))
+                                .font(.system(size: 12))
+                        }
+                    }
+                    HStack {
+                        Text(review.userName.isEmpty ? "Utilisateur" : review.userName)
+                            .font(.system(size: 14, weight: .semibold))
+                        Spacer()
+                        Text(formatDate(review.date))
+                            .font(.system(size: 12))
+                            .foregroundColor(AppTheme.textSecondary)
+                    }
+                    Text(review.comment)
+                        .font(.system(size: 14))
+                        .foregroundColor(AppTheme.textSecondary)
+                        .lineLimit(2)
+                }
+                .padding()
+                .background(Color.gray.opacity(0.05))
+                .cornerRadius(12)
+                .padding(.horizontal, 20)
             }
-            .padding()
-            .background(Color.gray.opacity(0.05))
-            .cornerRadius(12)
-            .padding(.horizontal, 20)
+            
+            // Loading indicator for reviews
+            if isLoadingReviews {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+            }
             
             // Navigate to all reviews
             NavigationLink(destination: ReviewsPage(property: property)) {

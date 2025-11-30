@@ -136,6 +136,10 @@ struct ProfileView: View {
                             ProfileRow(icon: "questionmark.circle.fill", title: "Centre d’aide")
                             ProfileRow(icon: "envelope.fill", title: "Nous contacter")
                             
+                            NavigationLink(destination: FeedbackView()) {
+                                ProfileRow(icon: "text.bubble.fill", title: "Envoyer un feedback")
+                            }
+                            
                             Button {
                                 showLogoutAlert = true
                             } label: {
