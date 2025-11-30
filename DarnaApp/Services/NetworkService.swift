@@ -33,7 +33,7 @@ enum NetworkError: Error, LocalizedError {
 final class NetworkService {
     static let shared = NetworkService()
     
-    private let baseURL = "http://10.147.89.155:3000"
+    private let baseURL = "http://10.42.113.107:3000"
     
     private init() {}
     
@@ -87,12 +87,14 @@ final class NetworkService {
 
     // MARK: - REGISTER (Fixed + Improved)
     func register(
+        username: String,
         fullName: String,
         email: String,
         password: String,
         birthDate: String,
         phoneNumber: String,
-        gender: String
+        gender: String,
+        role: String
     ) async throws -> User {
         guard let url = URL(string: "\(baseURL)/auth/register") else {
             throw NetworkError.invalidURL
@@ -113,12 +115,14 @@ final class NetworkService {
         let isoBirthDate = convertToISODate(birthDate)
         let cleanPhone = phoneNumber.replacingOccurrences(of: "+216", with: "")
         let genderValue = gender == "Homme" ? "Male" : "Female"
+        // Role is already in correct backend format (client/collocator/sponsor)
+        let roleValue = role.lowercased()
 
         let payload: [String: Any] = [
-            "username": fullName,
+            "username": username,
             "email": email,
             "password": password,
-            "role": "client",
+            "role": roleValue,
             "dateDeNaissance": isoBirthDate,
             "numTel": cleanPhone,
             "gender": genderValue

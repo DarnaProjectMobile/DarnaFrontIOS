@@ -614,7 +614,9 @@ struct MiniMapPreview: View {
 
 // MARK: - Preview
 
-#Preview {
-    MapLocationPickerView(selectedAddress: .constant(""))
+struct MapLocationPickerView_Previews: PreviewProvider {
+    static var previews: some View {
+        MapLocationPickerView(selectedAddress: .constant(""))
+    }
 }
 

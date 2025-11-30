@@ -11,7 +11,6 @@ import Combine
 extension Notification.Name {
     static let authenticationDidChange = Notification.Name("authenticationDidChange")
     static let shouldDismissMainApp = Notification.Name("shouldDismissMainApp")
-    static let favoritesDidChange = Notification.Name("favoritesDidChange")
 }
 
 @MainActor

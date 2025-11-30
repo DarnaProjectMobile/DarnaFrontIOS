@@ -11,6 +11,7 @@ enum ReviewError: Error, LocalizedError {
     case invalidURL
     case noAuthToken
     case encodingError
+    case decodingError
     case serverError(String)
     case invalidResponse
     case unauthorized
@@ -24,6 +25,8 @@ enum ReviewError: Error, LocalizedError {
             return "Vous devez être connecté pour effectuer cette action."
         case .encodingError:
             return "Erreur lors de la préparation des données."
+        case .decodingError:
+            return "Erreur de décodage des données."
         case .serverError(let message):
             return message
         case .invalidResponse:
@@ -50,7 +53,7 @@ struct UpdateReviewRequest: Codable {
 final class ReviewService {
     static let shared = ReviewService()
     
-    private let baseURL = "http://10.147.89.155:3000/reviews"
+    private let baseURL = "http://10.42.113.107:3000/reviews"
     
     private init() {}
     
@@ -67,9 +70,52 @@ final class ReviewService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // Add auth token if available
-        if let token = AuthenticationManager.shared.authToken {
+        if let token = await AuthenticationManager.shared.authToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ReviewError.invalidResponse
+        }
+        
+        switch httpResponse.statusCode {
+        case 200:
+            do {
+                let reviews = try JSONDecoder().decode([Review].self, from: data)
+                return reviews
+            } catch {
+                throw ReviewError.decodingError
+            }
+        case 401:
+            throw ReviewError.unauthorized
+        default:
+            throw ReviewError.serverError("Erreur lors de la récupération des avis.")
+        }
+    }
+    
+    /// Fetch reviews by current user for a specific property
+    /// - Parameter propertyId: The ID of the property
+    /// - Returns: Array of reviews by current user for the property
+    func fetchUserReviews(for propertyId: String) async throws -> [Review] {
+        guard let userId = await AuthenticationManager.shared.currentUser?.id else {
+            throw ReviewError.noAuthToken
+        }
+        
+        guard let url = URL(string: "\(baseURL)?property=\(propertyId)&user=\(userId)") else {
+            throw ReviewError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Add auth token
+        guard let token = await AuthenticationManager.shared.authToken else {
+            throw ReviewError.noAuthToken
+        }
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -103,7 +149,7 @@ final class ReviewService {
             throw ReviewError.invalidURL
         }
         
-        guard let token = AuthenticationManager.shared.authToken else {
+        guard let token = await AuthenticationManager.shared.authToken else {
             throw ReviewError.noAuthToken
         }
         
@@ -151,7 +197,7 @@ final class ReviewService {
             throw ReviewError.invalidURL
         }
         
-        guard let token = AuthenticationManager.shared.authToken else {
+        guard let token = await AuthenticationManager.shared.authToken else {
             throw ReviewError.noAuthToken
         }
         
@@ -197,7 +243,7 @@ final class ReviewService {
             throw ReviewError.invalidURL
         }
         
-        guard let token = AuthenticationManager.shared.authToken else {
+        guard let token = await AuthenticationManager.shared.authToken else {
             throw ReviewError.noAuthToken
         }
         

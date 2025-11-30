@@ -192,14 +192,15 @@ struct BookPropertyPage: View {
                 onBookingSuccess?(updatedProperty)
                 showSuccessAlert = true
             }
+        } catch let networkError as NetworkError {
+            await MainActor.run {
+                isLoading = false
+                errorMessage = networkError.localizedDescription
+            }
         } catch {
             await MainActor.run {
                 isLoading = false
-                if let networkError = error as? NetworkError {
-                    errorMessage = networkError.localizedDescription
-                } else {
-                    errorMessage = "Une erreur est survenue: \(error.localizedDescription)"
-                }
+                errorMessage = "Une erreur est survenue: \(error.localizedDescription)"
             }
         }
     }

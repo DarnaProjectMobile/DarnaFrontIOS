@@ -61,6 +61,20 @@
 		B0FB5F2E2EC4B8680036C3A1 /* PubliciteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FB5F2D2EC4B8680036C3A1 /* PubliciteListView.swift */; };
 		B0FB5F302EC4D5790036C3A1 /* PropertyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FB5F2F2EC4D5790036C3A1 /* PropertyService.swift */; };
 		B0FB5F322EC5A5B60036C3A1 /* PropertyCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FB5F312EC5A5B60036C3A1 /* PropertyCardView.swift */; };
+		B0NEW0012FIXMISSING001 /* Booking.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0002FIXMISSING001 /* Booking.swift */; };
+		B0NEW0032FIXMISSING001 /* FavoritesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0022FIXMISSING001 /* FavoritesManager.swift */; };
+		B0NEW0052FIXMISSING001 /* MapLocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0042FIXMISSING001 /* MapLocationPickerView.swift */; };
+		B0NEW0072FIXMISSING002 /* NominatimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0062FIXMISSING002 /* NominatimService.swift */; };
+		B0NEW0092FIXMISSING002 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0082FIXMISSING002 /* FavoritesView.swift */; };
+		B0NEW0112FIXMISSING002 /* MyReservationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0102FIXMISSING002 /* MyReservationsView.swift */; };
+		B0NEW0132FIXMISSING002 /* AcceptedClientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0122FIXMISSING002 /* AcceptedClientsView.swift */; };
+		B0NEW0152FIXMISSING002 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0142FIXMISSING002 /* FeedbackView.swift */; };
+		B0NEW0172FIXMISSING003 /* PropertyBookingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0162FIXMISSING003 /* PropertyBookingsView.swift */; };
+		B0NEW0192FIXMISSING003 /* PropertyImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0182FIXMISSING003 /* PropertyImageView.swift */; };
+		B0NEW0212FIXMISSING004 /* Feedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0202FIXMISSING004 /* Feedback.swift */; };
+		B0NEW0232FIXMISSING004 /* FeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0222FIXMISSING004 /* FeedbackService.swift */; };
+		B0NEW0272FIXMISSING004 /* ReviewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0262FIXMISSING004 /* ReviewService.swift */; };
+		B0NEW0292FIXMISSING004 /* BookPropertyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0NEW0282FIXMISSING004 /* BookPropertyPage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +152,20 @@
 		B0FB5F2D2EC4B8680036C3A1 /* PubliciteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PubliciteListView.swift; sourceTree = "<group>"; };
 		B0FB5F2F2EC4D5790036C3A1 /* PropertyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyService.swift; sourceTree = "<group>"; };
 		B0FB5F312EC5A5B60036C3A1 /* PropertyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyCardView.swift; sourceTree = "<group>"; };
+		B0NEW0002FIXMISSING001 /* Booking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Booking.swift; sourceTree = "<group>"; };
+		B0NEW0022FIXMISSING001 /* FavoritesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesManager.swift; sourceTree = "<group>"; };
+		B0NEW0042FIXMISSING001 /* MapLocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapLocationPickerView.swift; sourceTree = "<group>"; };
+		B0NEW0062FIXMISSING002 /* NominatimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NominatimService.swift; sourceTree = "<group>"; };
+		B0NEW0082FIXMISSING002 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		B0NEW0102FIXMISSING002 /* MyReservationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyReservationsView.swift; sourceTree = "<group>"; };
+		B0NEW0122FIXMISSING002 /* AcceptedClientsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcceptedClientsView.swift; sourceTree = "<group>"; };
+		B0NEW0142FIXMISSING002 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
+		B0NEW0162FIXMISSING003 /* PropertyBookingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyBookingsView.swift; sourceTree = "<group>"; };
+		B0NEW0182FIXMISSING003 /* PropertyImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyImageView.swift; sourceTree = "<group>"; };
+		B0NEW0202FIXMISSING004 /* Feedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
+		B0NEW0222FIXMISSING004 /* FeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackService.swift; sourceTree = "<group>"; };
+		B0NEW0262FIXMISSING004 /* ReviewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewService.swift; sourceTree = "<group>"; };
+		B0NEW0282FIXMISSING004 /* BookPropertyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookPropertyPage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,6 +269,8 @@
 				B09771882EBE20F10043111F /* Review.swift */,
 				B08E10662EC1DEA2001E4064 /* userModel.swift */,
 				B0FB5F232EC4B7790036C3A1 /* Publicite.swift */,
+				B0NEW0002FIXMISSING001 /* Booking.swift */,
+				B0NEW0202FIXMISSING004 /* Feedback.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -261,7 +291,7 @@
 			children = (
 				B0CA93502EBCCC2500CCF5AD /* AdRepository.swift */,
 			);
-			path = " Repository";
+			path = "Repository";
 			sourceTree = "<group>";
 		};
 		B0CA93522EBCCC3A00CCF5AD /* ViewModels */ = {
@@ -304,6 +334,12 @@
 				B09771842EBE1B630043111F /* ProfileView.swift */,
 				B09771862EBE1F0C0043111F /* ListReviewView.swift */,
 				B0FB5F2D2EC4B8680036C3A1 /* PubliciteListView.swift */,
+				B0NEW0082FIXMISSING002 /* FavoritesView.swift */,
+				B0NEW0102FIXMISSING002 /* MyReservationsView.swift */,
+				B0NEW0122FIXMISSING002 /* AcceptedClientsView.swift */,
+				B0NEW0142FIXMISSING002 /* FeedbackView.swift */,
+				B0NEW0162FIXMISSING003 /* PropertyBookingsView.swift */,
+				B0NEW0282FIXMISSING004 /* BookPropertyPage.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -318,6 +354,8 @@
 				B0FB5F292EC4B81A0036C3A1 /* PubliciteCardView.swift */,
 				B0FB5F2B2EC4B8480036C3A1 /* PubliciteFormView.swift */,
 				B0FB5F312EC5A5B60036C3A1 /* PropertyCardView.swift */,
+				B0NEW0042FIXMISSING001 /* MapLocationPickerView.swift */,
+				B0NEW0182FIXMISSING003 /* PropertyImageView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -336,6 +374,10 @@
 				B0CA935D2EBCCE2000CCF5AD /* NotificationService.swift */,
 				B04963762EBE2F110035B969 /* NetworkService.swift */,
 				B08E10682EC1DF56001E4064 /* AuthenticationManager.swift */,
+				B0NEW0022FIXMISSING001 /* FavoritesManager.swift */,
+				B0NEW0062FIXMISSING002 /* NominatimService.swift */,
+				B0NEW0222FIXMISSING004 /* FeedbackService.swift */,
+				B0NEW0262FIXMISSING004 /* ReviewService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -519,6 +561,20 @@
 				B0CA937E2EBCCF3000CCF5AD /* CustomRoundedShape.swift in Sources */,
 				B04963772EBE2F110035B969 /* NetworkService.swift in Sources */,
 				B0CA93802EBCCF4000CCF5AD /* AddPropertyFormView.swift in Sources */,
+				B0NEW0012FIXMISSING001 /* Booking.swift in Sources */,
+				B0NEW0032FIXMISSING001 /* FavoritesManager.swift in Sources */,
+				B0NEW0052FIXMISSING001 /* MapLocationPickerView.swift in Sources */,
+				B0NEW0072FIXMISSING002 /* NominatimService.swift in Sources */,
+				B0NEW0092FIXMISSING002 /* FavoritesView.swift in Sources */,
+				B0NEW0112FIXMISSING002 /* MyReservationsView.swift in Sources */,
+				B0NEW0132FIXMISSING002 /* AcceptedClientsView.swift in Sources */,
+				B0NEW0152FIXMISSING002 /* FeedbackView.swift in Sources */,
+				B0NEW0172FIXMISSING003 /* PropertyBookingsView.swift in Sources */,
+				B0NEW0192FIXMISSING003 /* PropertyImageView.swift in Sources */,
+				B0NEW0212FIXMISSING004 /* Feedback.swift in Sources */,
+				B0NEW0232FIXMISSING004 /* FeedbackService.swift in Sources */,
+				B0NEW0272FIXMISSING004 /* ReviewService.swift in Sources */,
+				B0NEW0292FIXMISSING004 /* BookPropertyPage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

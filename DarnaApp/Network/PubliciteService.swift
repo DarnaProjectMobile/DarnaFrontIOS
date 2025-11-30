@@ -16,7 +16,7 @@ class PubliciteService: PubliciteServiceProtocol {
     static let shared = PubliciteService()
     
     // TODO: Modifier selon votre configuration
-    private let baseURL = "http://172.20.10.2:3000/publicite"
+    private let baseURL = "http://10.42.113.107:3000/publicite"
     
     private init() {}
     

@@ -9,8 +9,8 @@ final class PropertyService {
     static let shared = PropertyService()
     private init() {}
     
-    // ✅ Centralized server URL — replace with your machine’s IP
-    private let baseURL = "http://10.147.89.155:3000"
+    // ✅ Centralized server URL — replace with your machine's IP
+    private let baseURL = "http://10.42.113.107:3000"
     // MARK: - Fetch all properties
     func fetchProperties() async throws -> [Property] {
         guard let url = URL(string: "\(baseURL)/annonces") else {

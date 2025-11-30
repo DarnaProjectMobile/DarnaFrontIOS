@@ -14,7 +14,7 @@ protocol AdAPIServiceProtocol {
 
 class AdAPIService: AdAPIServiceProtocol {
     // TODO: Mettre à jour avec l'URL de votre backend NestJS
-    private let baseURL = "https://api.darnaapp.com/api/ads"
+    private let baseURL = "http://10.42.113.107:3000/api/ads"
     
     // MARK: - Mock Implementation (Mode statique - pas de backend pour l'instant)
     // Ces méthodes simulent les appels API mais retournent des données statiques

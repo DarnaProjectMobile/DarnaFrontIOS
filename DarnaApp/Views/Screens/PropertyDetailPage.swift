@@ -389,7 +389,7 @@ struct PropertyDetailPage: View {
         Task {
             do {
                 // In a real implementation, you would get the current user's name
-                let currentUser = AuthenticationManager.shared.currentUser
+                let currentUser = await AuthenticationManager.shared.currentUser
                 let userName = currentUser?.username ?? "Utilisateur"
                 
                 let newReview = try await ReviewService.shared.createReview(
@@ -422,9 +422,9 @@ struct PropertyDetailPage: View {
             
             // Average Rating
             HStack(spacing: 8) {
-                ForEach(1...5, id: \.\self) { star in
+                ForEach(1...5, id: \.self) { star in
                     Image(systemName: "star.fill")
-                        .foregroundColor(star <= averageRating ? .yellow : .gray.opacity(0.3))
+                        .foregroundColor(star <= Int(averageRating.rounded()) ? .yellow : .gray.opacity(0.3))
                 }
                 Text(String(format: "%.1f", averageRating))
                     .font(.system(size: 20, weight: .semibold))
@@ -450,7 +450,7 @@ struct PropertyDetailPage: View {
             ForEach(recentReviews.prefix(3)) { review in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 2) {
-                        ForEach(1...5, id: \.\self) { star in
+                        ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= review.rating ? "star.fill" : "star")
                                 .foregroundColor(star <= review.rating ? .yellow : .gray.opacity(0.3))
                                 .font(.system(size: 12))

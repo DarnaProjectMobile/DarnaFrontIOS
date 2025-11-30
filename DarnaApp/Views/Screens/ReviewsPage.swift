@@ -11,16 +11,21 @@ struct ReviewsPage: View {
 
     @State private var selectedFilter: Int? = nil // nil = All
     @State private var reviews: [Review] = []
+    @State private var userReviews: [Review] = [] // Reviews by current user
+    @State private var showOnlyUserReviews = false // Toggle to show only user's reviews
     @State private var isLoading = false
     @State private var errorMessage: String? = nil
     @State private var showAddReview = false
 
-    // Filtered reviews by star rating
+    // Filtered reviews by star rating and user toggle
     var filteredReviews: [Review] {
+        var filtered = showOnlyUserReviews ? userReviews : reviews
+        
         if let filter = selectedFilter {
-            return reviews.filter { $0.rating == filter }
+            filtered = filtered.filter { $0.rating == filter }
         }
-        return reviews
+        
+        return filtered
     }
 
     var body: some View {
@@ -47,14 +52,22 @@ struct ReviewsPage: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
-
+                
+                // Toggle to show only user's reviews
+                HStack {
+                    Toggle("Mes avis uniquement", isOn: $showOnlyUserReviews)
+                        .toggleStyle(SwitchToggleStyle(tint: AppTheme.primary))
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                
                 // Filters like Google Play
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
                         FilterButton(label: "Tous", isSelected: selectedFilter == nil) {
                             selectedFilter = nil
                         }
-                        ForEach((1...5).reversed(), id: \.\self) { star in
+                        ForEach((1...5).reversed(), id: \.self) { star in
                             FilterButton(label: "\(star)★", isSelected: selectedFilter == star) {
                                 selectedFilter = star
                             }
@@ -117,9 +130,15 @@ extension ReviewsPage {
             }
             
             do {
-                let fetchedReviews = try await ReviewService.shared.fetchReviews(for: property.id)
+                // Fetch all reviews for the property
+                let allReviews = try await ReviewService.shared.fetchReviews(for: property.id)
+                
+                // Fetch only reviews by current user for this property
+                let userReviewsData = try await ReviewService.shared.fetchUserReviews(for: property.id)
+                
                 await MainActor.run {
-                    reviews = fetchedReviews
+                    reviews = allReviews
+                    userReviews = userReviewsData
                     isLoading = false
                 }
             } catch {
@@ -161,6 +180,7 @@ struct ReviewRowView: View {
     @State private var showEditSheet = false
     @State private var showDeleteAlert = false
     
+    @MainActor
     var isOwnedByCurrentUser: Bool {
         review.userId == AuthenticationManager.shared.currentUser?.id
     }
@@ -169,7 +189,7 @@ struct ReviewRowView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 HStack(spacing: 2) {
-                    ForEach(1...5, id: \.\self) { star in
+                    ForEach(1...5, id: \.self) { star in
                         Image(systemName: star <= review.rating ? "star.fill" : "star")
                             .foregroundColor(star <= review.rating ? .yellow : .gray.opacity(0.3))
                             .font(.system(size: 14))
@@ -260,7 +280,7 @@ struct AddReviewView: View {
             Form {
                 Section(header: Text("Note")) {
                     HStack {
-                        ForEach(1...5, id: \.\self) { star in
+                        ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= rating ? "star.fill" : "star")
                                 .font(.system(size: 30))
                                 .foregroundColor(star <= rating ? .yellow : .gray.opacity(0.4))
@@ -359,7 +379,7 @@ struct EditReviewView: View {
             Form {
                 Section(header: Text("Note")) {
                     HStack {
-                        ForEach(1...5, id: \.\self) { star in
+                        ForEach(1...5, id: \.self) { star in
                             Image(systemName: star <= rating ? "star.fill" : "star")
                                 .font(.system(size: 30))
                                 .foregroundColor(star <= rating ? .yellow : .gray.opacity(0.4))
