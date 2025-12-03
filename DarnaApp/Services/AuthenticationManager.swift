@@ -31,6 +31,7 @@ final class AuthenticationManager: ObservableObject {
         authToken = response.token
         persistUser(response.user)
         persistToken(response.token)
+        PushNotificationManager.shared.syncTokenWithBackendIfNeeded()
         NotificationCenter.default.post(name: .authenticationDidChange, object: nil)
     }
 
@@ -41,10 +42,14 @@ final class AuthenticationManager: ObservableObject {
             currentUser = user
         }
         authToken = UserDefaults.standard.string(forKey: "authToken")
+        if authToken != nil {
+            PushNotificationManager.shared.syncTokenWithBackendIfNeeded()
+        }
     }
 
     // MARK: - Sign Out
     func signOut() {
+        PushNotificationManager.shared.unregisterDeviceTokenFromBackend()
         // Clear data safely
         currentUser = nil
         authToken = nil

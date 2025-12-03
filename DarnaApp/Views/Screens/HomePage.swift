@@ -22,6 +22,7 @@ struct HomePage: View {
     @State private var maxPrice: Double? = nil
     @State private var ownershipFilter: OwnershipFilter = .all
     @FocusState private var isSearchFocused: Bool
+    @State private var showMap = false
     
     private enum OwnershipFilter {
         case all
@@ -39,7 +40,7 @@ struct HomePage: View {
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .bottom) {
                 AppTheme.background.ignoresSafeArea()
 
                 VStack(spacing: 16) {
@@ -94,21 +95,42 @@ struct HomePage: View {
                     }
                 }
                 .padding(.top, 16)
-                .padding(.bottom, currentUserRole == "collocator" ? 100 : 24)
+                .padding(.bottom, currentUserRole == "collocator" ? 110 : 70)
 
-                // âœ… Floating Add Button (only for collocators)
-                if currentUserRole == "collocator" {
+                // Bottom overlay buttons (Map + Add)
+                VStack(spacing: 12) {
+                    // Map pill button (always visible)
                     Button {
-                        showAddPropertyForm = true
+                        showMap = true
                     } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(AppTheme.primary)
-                            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 3)
+                        HStack(spacing: 8) {
+                            Image(systemName: "map.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("Carte des annonces")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .foregroundColor(.white)
+                        .background(AppTheme.primary)
+                        .cornerRadius(999)
+                        .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
                     }
-                    .padding(.trailing, 24)
-                    .padding(.bottom, 24)
+
+                    // Floating Add Button (only for collocators)
+                    if currentUserRole == "collocator" {
+                        Button {
+                            showAddPropertyForm = true
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(AppTheme.primary)
+                                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 3)
+                        }
+                    }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 24)
             }
             .navigationTitle("Accueil")
             .task {
@@ -117,6 +139,9 @@ struct HomePage: View {
             .sheet(isPresented: $showFilterSheet) {
                 FilterSheetView(minPrice: $minPrice, maxPrice: $maxPrice, onApply: applyFilters)
                     .presentationDetents([.fraction(0.35)])
+            }
+            .sheet(isPresented: $showMap) {
+                PropertyMapView(properties: filteredProperties)
             }
             .navigationDestination(for: Property.self) { property in
                 PropertyDetailPage(property: property)

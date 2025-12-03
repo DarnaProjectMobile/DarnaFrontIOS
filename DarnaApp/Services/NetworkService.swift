@@ -35,6 +35,10 @@ final class NetworkService {
     
     private let baseURL = "http://10.147.89.155:3000"
     
+    private struct DeviceTokenPayload: Codable {
+        let deviceToken: String
+    }
+    
     private init() {}
     
     // MARK: - LOGIN
@@ -212,5 +216,72 @@ final class NetworkService {
         
         guard let data = Data(base64Encoded: base64) else { return nil }
         return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+    }
+    
+    // MARK: - Push notifications
+    func registerDeviceToken(_ token: String) async throws {
+        guard let url = URL(string: "\(baseURL)/users/me/device-token") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let authToken = await MainActor.run {
+            AuthenticationManager.shared.authToken
+        }
+        
+        guard let authToken else {
+            throw NetworkError.unauthorized
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        
+        let payload = DeviceTokenPayload(deviceToken: token)
+        request.httpBody = try JSONEncoder().encode(payload)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+        
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            throw NetworkError.invalidResponse
+        }
+    }
+    
+    func removeDeviceToken(_ token: String) async throws {
+        guard let url = URL(string: "\(baseURL)/users/me/device-token") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let authToken = await MainActor.run {
+            AuthenticationManager.shared.authToken
+        }
+        
+        guard let authToken else {
+            throw NetworkError.unauthorized
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+        
+        let payload = DeviceTokenPayload(deviceToken: token)
+        request.httpBody = try JSONEncoder().encode(payload)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.invalidResponse
+        }
+        
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            throw NetworkError.invalidResponse
+        }
     }
 }
