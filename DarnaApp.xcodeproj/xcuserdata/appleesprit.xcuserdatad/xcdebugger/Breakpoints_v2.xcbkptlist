@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "F1C1BE00-5BAD-47CA-A423-D018F91CB36F"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "56B10B7F-237B-403F-9CB8-FCEA188888F2"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DarnaApp/Views/Components/VisitCardView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "23"
+            endingLineNumber = "23"
+            landmarkName = "VisitCardView"
+            landmarkType = "14">
+            <Locations>
+               <Location
+                  uuid = "56B10B7F-237B-403F-9CB8-FCEA188888F2 - cabe5f20722e3196"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "property wrapper backing initializer of DarnaApp.VisitCardView.isPressed : Swift.Bool"
+                  moduleName = "DarnaApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/appleesprit/Desktop/manel/darnason/DarnaApp%20finam%202/DarnaApp/Views/Components/VisitCardView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "24"
+                  endingLineNumber = "24"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  uuid = "56B10B7F-237B-403F-9CB8-FCEA188888F2 - 9d099ba5b2dba48"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "DarnaApp.VisitCardView.init(visit: DarnaApp.Visit, subtitle: Swift.Optional&lt;Swift.String&gt;, accentColor: SwiftUI.Color, onEdit: Swift.Optional&lt;() -&gt; ()&gt;, onCancel: Swift.Optional&lt;() -&gt; ()&gt;, onDelete: Swift.Optional&lt;() -&gt; ()&gt;, onValidate: Swift.Optional&lt;() -&gt; ()&gt;, onReview: Swift.Optional&lt;() -&gt; ()&gt;, onAccept: Swift.Optional&lt;() -&gt; ()&gt;, onReject: Swift.Optional&lt;() -&gt; ()&gt;, onSeeReview: Swift.Optional&lt;() -&gt; ()&gt;) -&gt; DarnaApp.VisitCardView"
+                  moduleName = "DarnaApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/appleesprit/Desktop/manel/darnason/DarnaApp%20finam%202/DarnaApp/Views/Components/VisitCardView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "24"
+                  endingLineNumber = "24"
+                  offsetFromSymbolStart = "180">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

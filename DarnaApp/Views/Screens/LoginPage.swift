@@ -12,7 +12,7 @@ struct LoginPage: View {
     @State private var rememberMe = false
     @State private var navigateToRegister = false
     @State private var navigateToMainApp = false
-    
+   
     @State private var isLoading = false
     @State private var errorMessage = ""
     @State private var showErrorAlert = false
@@ -22,7 +22,7 @@ struct LoginPage: View {
             ZStack {
                 AppTheme.background
                     .ignoresSafeArea()
-                
+               
                 VStack(spacing: 0) {
                     // MARK: - Logo and App Name
                     VStack(spacing: 12) {
@@ -33,13 +33,13 @@ struct LoginPage: View {
                     }
                     .padding(.top, 60)
                     .padding(.bottom, 40)
-                    
+                   
                     // MARK: - Welcome Message
                     Text("Welcome to Darna")
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundColor(AppTheme.textPrimary)
                         .padding(.bottom, 40)
-                    
+                   
                     // MARK: - Input Fields
                     VStack(spacing: 20) {
                         // Email
@@ -47,7 +47,7 @@ struct LoginPage: View {
                             .textFieldStyle(CustomTextFieldStyle())
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
-                        
+                       
                         // Password
                         HStack {
                             if showPassword {
@@ -74,11 +74,15 @@ struct LoginPage: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 20)
-                    
+                   
                     // MARK: - Remember Me + Forgot Password
                     HStack {
                         Button {
                             rememberMe.toggle()
+                            // Clear credentials if user unchecks "Remember Me"
+                            if !rememberMe {
+                                KeychainHelper.shared.clearCredentials()
+                            }
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: rememberMe ? "checkmark.square.fill" : "square")
@@ -88,9 +92,9 @@ struct LoginPage: View {
                                     .foregroundColor(AppTheme.textPrimary)
                             }
                         }
-                        
+                       
                         Spacer()
-                        
+                       
                         Button {
                             // TODO: Forgot password action
                         } label: {
@@ -101,7 +105,7 @@ struct LoginPage: View {
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 30)
-                    
+                   
                     // MARK: - Sign In Button
                     Button {
                         Task {
@@ -128,13 +132,13 @@ struct LoginPage: View {
                     .disabled(isLoading)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 30)
-                    
+                   
                     // MARK: - Register
                     HStack(spacing: 4) {
                         Text("Don't Have An Account?")
                             .font(.system(size: 14))
                             .foregroundColor(AppTheme.textSecondary)
-                        
+                       
                         Button {
                             navigateToRegister = true
                         } label: {
@@ -143,7 +147,7 @@ struct LoginPage: View {
                                 .foregroundColor(AppTheme.primary)
                         }
                     }
-                    
+                   
                     Spacer()
                 }
                 // MARK: - Error Alert
@@ -158,12 +162,15 @@ struct LoginPage: View {
             .navigationDestination(isPresented: $navigateToRegister) {
                 CreateAccountPage()
             }
-            .navigationDestination(isPresented: $navigateToMainApp) {
+            .fullScreenCover(isPresented: $navigateToMainApp) {
                 MainAppView()
+            }
+            .onAppear {
+                loadSavedCredentials()
             }
         }
     }
-    
+   
     // MARK: - Handle Login Logic
     @MainActor
     private func handleLogin() async {
@@ -173,23 +180,45 @@ struct LoginPage: View {
             showErrorAlert = true
             return
         }
-        
+       
         isLoading = true
         defer { isLoading = false }
-        
+       
         do {
             let response = try await NetworkService.shared.login(email: email, password: password)
             print("✅ Login successful for:", response.user.username)
-            
+           
+            // Save credentials if "Remember Me" is checked
+            if rememberMe {
+                KeychainHelper.shared.saveCredentials(email: email, password: password)
+            } else {
+                // Clear credentials if "Remember Me" is unchecked
+                KeychainHelper.shared.clearCredentials()
+            }
+           
             // Navigate if successful
             navigateToMainApp = true
-            
+           
         } catch let error as NetworkError {
             errorMessage = error.localizedDescription
             showErrorAlert = true
         } catch {
             errorMessage = "An unknown error occurred. Please try again."
             showErrorAlert = true
+        }
+    }
+    
+    // MARK: - Load Saved Credentials
+    private func loadSavedCredentials() {
+        let credentials = KeychainHelper.shared.loadCredentials()
+        
+        if let savedEmail = credentials.email {
+            email = savedEmail
+            rememberMe = true
+        }
+        
+        if let savedPassword = credentials.password {
+            password = savedPassword
         }
     }
 }

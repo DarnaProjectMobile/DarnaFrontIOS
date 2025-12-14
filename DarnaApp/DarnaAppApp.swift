@@ -14,6 +14,9 @@ struct DarnaAppApp: App {
     init() {
         // Demander l'autorisation pour les notifications
         NotificationService.shared.requestAuthorization()
+        
+        // Configurer Stripe
+        StripeConfig.configureIfNeeded()
     }
     
     var body: some Scene {

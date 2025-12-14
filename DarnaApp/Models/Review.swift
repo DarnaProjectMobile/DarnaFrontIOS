@@ -9,23 +9,36 @@ import Foundation
 
 /// Represents a user review for a property or colocation.
 struct Review: Identifiable, Codable, Equatable {
-    let id: UUID
+    let id: String
     var userId: String         // ID of the user who posted the review
     var propertyId: String     // ID of the property being reviewed
     var propertyName: String   // Display name of the property
     var rating: Int            // 1–5 stars
     var comment: String
     var date: Date
+    var userName: String       // Name of the user who posted the review
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case userId
+        case propertyId
+        case propertyName
+        case rating
+        case comment
+        case date
+        case userName
+    }
     
     // MARK: - Initializer
     init(
-        id: UUID = UUID(),
+        id: String,
         userId: String,
         propertyId: String,
         propertyName: String,
         rating: Int,
         comment: String,
-        date: Date = Date()
+        date: Date = Date(),
+        userName: String = ""
     ) {
         self.id = id
         self.userId = userId
@@ -34,6 +47,7 @@ struct Review: Identifiable, Codable, Equatable {
         self.rating = rating
         self.comment = comment
         self.date = date
+        self.userName = userName
     }
 }
 
@@ -41,28 +55,34 @@ struct Review: Identifiable, Codable, Equatable {
 extension Review {
     static let sampleData: [Review] = [
         Review(
+            id: "review_001",
             userId: "user_001",
             propertyId: "prop_001",
             propertyName: "Colocation Paris 11",
             rating: 5,
             comment: "Super logement, très calme et bien situé !",
-            date: Date()
+            date: Date(),
+            userName: "Amine B."
         ),
         Review(
-            userId: "user_001",
-            propertyId: "prop_002",
-            propertyName: "Studio Lyon",
+            id: "review_002",
+            userId: "user_002",
+            propertyId: "prop_001",
+            propertyName: "Colocation Paris 11",
             rating: 4,
             comment: "Jolie déco, bon rapport qualité prix.",
-            date: Date().addingTimeInterval(-86400 * 3)
+            date: Date().addingTimeInterval(-86400 * 3),
+            userName: "Sara K."
         ),
         Review(
-            userId: "user_001",
-            propertyId: "prop_003",
-            propertyName: "Appartement Nice",
+            id: "review_003",
+            userId: "user_003",
+            propertyId: "prop_001",
+            propertyName: "Colocation Paris 11",
             rating: 3,
             comment: "Pas mal, mais voisinage un peu bruyant.",
-            date: Date().addingTimeInterval(-86400 * 10)
+            date: Date().addingTimeInterval(-86400 * 10),
+            userName: "Omar L."
         )
     ]
 }

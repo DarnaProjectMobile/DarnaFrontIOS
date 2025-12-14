@@ -5,13 +5,14 @@
 
 import Foundation
 
-enum NetworkError: Error, LocalizedError {
+enum NetworkError: Error, LocalizedError, Equatable {
     case invalidURL
     case noData
     case decodingError
     case serverError(String)
     case invalidResponse
     case unauthorized
+    case forbidden         // Pour gérer les erreurs 403
     case emailAlreadyExists
     case encodingError
 
@@ -23,24 +24,30 @@ enum NetworkError: Error, LocalizedError {
         case .serverError(let message): return message
         case .invalidResponse: return "Réponse du serveur invalide."
         case .unauthorized: return "Identifiants incorrects."
+        case .forbidden: return "Accès refusé."
         case .emailAlreadyExists: return "Cet email est déjà enregistré."
         case .encodingError: return "Erreur lors de la préparation des données."
         }
     }
 }
 
-// MARK: - Network Service (DarnaApp)
+
+
+// MARK: - Network Service (DarnaApp)  
 final class NetworkService {
     static let shared = NetworkService()
-    
-    // ✅ Change this IP if your local server changes
-    private let baseURL = "http://172.20.10.2:3000"
+    private let baseURL = "http://172.18.8.236:3000"
     
     private init() {}
     
     // MARK: - LOGIN
     func login(email: String, password: String) async throws -> SignInResponse {
-        guard let url = URL(string: "\(baseURL)/auth/login") else {
+        //let loginURL = "\(baseURL)/auth/login"
+        let loginURL = "\(baseURL)/auth/login"
+        print("🔐 Tentative de connexion à: \(loginURL)")
+        
+        guard let url = URL(string: loginURL) else {
+            print("❌ URL invalide: \(loginURL)")
             throw NetworkError.invalidURL
         }
 
@@ -51,38 +58,79 @@ final class NetworkService {
 
         let body = ["email": email, "password": password]
         request.httpBody = try JSONEncoder().encode(body)
+        
+        print("📤 Envoi de la requête de login...")
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            print("📥 Réponse reçue du serveur")
 
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.invalidResponse
-        }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Réponse HTTP invalide")
+                throw NetworkError.invalidResponse
+            }
+            
+            print("📊 Code de statut HTTP: \(httpResponse.statusCode)")
+            if let responseBody = String(data: data, encoding: .utf8) {
+                print("📦 Corps de la réponse: \(responseBody.prefix(200))")
+            }
 
-        switch httpResponse.statusCode {
-        case 200, 201:
-            do {
-                let signInResponse = try JSONDecoder().decode(SignInResponse.self, from: data)
-                print("✅ Connexion réussie :", signInResponse.user.username)
-                
-                await MainActor.run {
-                    AuthenticationManager.shared.signIn(with: signInResponse)
+            switch httpResponse.statusCode {
+            case 200, 201:
+                do {
+                    let signInResponse = try JSONDecoder().decode(SignInResponse.self, from: data)
+                    print("✅ Connexion réussie :", signInResponse.user.username)
+                    
+                    await MainActor.run {
+                        AuthenticationManager.shared.signIn(with: signInResponse)
+                    }
+                    return signInResponse
+
+                } catch {
+                    print("❌ Erreur de décodage:", error)
+                    throw NetworkError.decodingError
                 }
-                return signInResponse
 
-            } catch {
-                print("❌ Erreur de décodage:", error)
-                throw NetworkError.decodingError
+            case 401:
+                throw NetworkError.unauthorized
+            default:
+                do {
+                    let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
+                    let errorMessage = errorResponse.message ?? "Erreur serveur (code \(httpResponse.statusCode))"
+                    print("❌ Erreur serveur: \(errorMessage)")
+                    throw NetworkError.serverError(errorMessage)
+                } catch {
+                    // Si on ne peut pas décoder l'erreur, utiliser le message brut
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("❌ Réponse d'erreur brute: \(responseString)")
+                        throw NetworkError.serverError("Erreur serveur (code \(httpResponse.statusCode)): \(responseString.prefix(100))")
+                    } else {
+                        throw NetworkError.serverError("Erreur serveur (code \(httpResponse.statusCode))")
+                    }
+                }
             }
-
-        case 401:
-            throw NetworkError.unauthorized
-        default:
-            do {
-                let errorResponse = try JSONDecoder().decode(ErrorResponse.self, from: data)
-                throw NetworkError.serverError(errorResponse.message)
-            } catch {
-                throw NetworkError.serverError("Une erreur inconnue est survenue.")
+        } catch let error as URLError {
+            print("❌ Erreur réseau: \(error.localizedDescription)")
+            print("   Code d'erreur: \(error.code.rawValue)")
+            print("   Description: \(error.localizedDescription)")
+            if let urlError = error as? URLError {
+                switch urlError.code {
+                case .notConnectedToInternet:
+                    throw NetworkError.serverError("Pas de connexion Internet. Vérifiez votre connexion réseau.")
+                case .cannotConnectToHost:
+                    throw NetworkError.serverError("Impossible de se connecter au serveur. Vérifiez que le serveur est démarré sur \(baseURL)")
+                case .timedOut:
+                    throw NetworkError.serverError("Connexion au serveur expirée. Vérifiez que le serveur est accessible.")
+                case .cannotFindHost:
+                    throw NetworkError.serverError("Serveur introuvable. Vérifiez l'adresse IP: \(baseURL)")
+                default:
+                    throw NetworkError.serverError("Erreur de connexion: \(error.localizedDescription)")
+                }
             }
+            throw NetworkError.serverError("Erreur réseau: \(error.localizedDescription)")
+        } catch {
+            print("❌ Erreur inconnue: \(error)")
+            throw error
         }
     }
 

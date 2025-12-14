@@ -8,11 +8,11 @@ import SwiftUI
 struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showSettings = false
-    @State private var navigateToLogin = false
     @State private var showLogoutAlert = false
     
     // Observe the current user from AuthenticationManager
     @StateObject private var authManager = AuthenticationManager.shared
+    @StateObject private var favoritesManager = FavoritesManager.shared
 
     var body: some View {
         NavigationStack {
@@ -85,11 +85,45 @@ struct ProfileView: View {
                         HStack(spacing: 16) {
                             StatCard(icon: "house.fill", title: "Logements", value: "5")
                             
-                            NavigationLink(destination: UserReviewsListView()) {
+                            NavigationLink(destination: ListReviewView()) {
                                 StatCard(icon: "star.fill", title: "Avis", value: "12")
                             }
                             
-                            StatCard(icon: "heart.fill", title: "Favoris", value: "8")
+                            NavigationLink(destination: FavoritesView()) {
+                                StatCard(icon: "heart.fill", title: "Favoris", value: "\(favoritesManager.getFavoritePropertyIds().count)")
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // MARK: - My Reviews Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            SectionHeader(title: "Mes avis")
+                            
+                            NavigationLink(destination: MyReviewsView()) {
+                                ProfileRow(icon: "star.bubble.fill", title: "Avis donnés")
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // MARK: - Collocator Space Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            SectionHeader(title: "Gestion des réservations")
+                            
+                            NavigationLink(destination: HomePage()) {
+                                ProfileRow(icon: "house.fill", title: "Mes annonces")
+                            }
+                            
+                            NavigationLink(destination: MyReservationsView()) {
+                                ProfileRow(icon: "clock.badge.questionmark", title: "Demandes en attente")
+                            }
+                            
+                            NavigationLink(destination: AcceptedClientsView()) {
+                                ProfileRow(icon: "person.crop.circle.badge.checkmark", title: "Clients acceptés")
+                            }
+                            
+                            NavigationLink(destination: CollocatorDashboardView()) {
+                                ProfileRow(icon: "chart.bar.fill", title: "Tableau de bord (Visites & Avis)")
+                            }
                         }
                         .padding(.horizontal)
                         
@@ -134,11 +168,6 @@ struct ProfileView: View {
             .navigationBarBackButtonHidden(true)
             .toolbar(.hidden, for: .navigationBar)
             
-            // Navigate to login page after logout
-            .navigationDestination(isPresented: $navigateToLogin) {
-                LoginPage()
-            }
-            
             // Logout confirmation alert
             .alert("Se déconnecter", isPresented: $showLogoutAlert) {
                 Button("Annuler", role: .cancel) {}
@@ -154,8 +183,9 @@ struct ProfileView: View {
     @MainActor
     private func handleLogout() {
         Task {
-            await AuthenticationManager.shared.signOut()
-            navigateToLogin = true
+            AuthenticationManager.shared.signOut()
+            // Post notification to dismiss MainAppView
+            NotificationCenter.default.post(name: .shouldDismissMainApp, object: nil)
         }
     }
 }

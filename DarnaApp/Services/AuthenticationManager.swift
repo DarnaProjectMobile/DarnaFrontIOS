@@ -10,14 +10,15 @@ import Combine
 
 extension Notification.Name {
     static let authenticationDidChange = Notification.Name("authenticationDidChange")
+    static let shouldDismissMainApp = Notification.Name("shouldDismissMainApp")
 }
 
 @MainActor
 final class AuthenticationManager: ObservableObject {
     static let shared = AuthenticationManager()
     private init() {}
-    
-    
+   
+   
 
     // MARK: - Published Properties
     @Published private(set) var currentUser: User? = nil
@@ -46,14 +47,18 @@ final class AuthenticationManager: ObservableObject {
         // Clear data safely
         currentUser = nil
         authToken = nil
-        
+       
         // Remove persisted session
         UserDefaults.standard.removeObject(forKey: "currentUser")
         UserDefaults.standard.removeObject(forKey: "authToken")
-        
+       
+        // Clear saved credentials if user signs out (optional - you might want to keep them)
+        // Uncomment the line below if you want to clear credentials on logout
+        // KeychainHelper.shared.clearCredentials()
+       
         // Notify about auth change
         NotificationCenter.default.post(name: .authenticationDidChange, object: nil)
-        
+       
         print("✅ User successfully signed out.")
     }
 
@@ -67,6 +72,6 @@ final class AuthenticationManager: ObservableObject {
     private func persistToken(_ token: String) {
         UserDefaults.standard.set(token, forKey: "authToken")
     }
-    
-    
+   
+   
 }

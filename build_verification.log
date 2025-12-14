@@ -1,0 +1,85 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project DarnaApp.xcodeproj -scheme DarnaApp -configuration Debug clean build
+
+User defaults from command line:
+    IDEPackageSupportUseBuiltinSCM = YES
+
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00008103-001470D13ED3001E }
+{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+{ platform:iOS Simulator, id:B4411A83-FC3C-491F-A0B9-3CD2C7081E04, OS:16.2, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:AF925171-EB08-4D57-BAD4-2D6B384FA7DF, OS:16.2, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:B2B545AA-2CA3-4ECE-9F51-FA967F33F0DE, OS:16.2, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:A01C878B-756C-4C39-8434-5B24FFDFA6A9, OS:16.2, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:22F0790D-B11E-4E6C-8A75-5A7657DF7D38, OS:16.2, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:4BF9364C-7A37-45AB-9D36-7A1118C73290, OS:16.2, name:iPhone 8 }
+{ platform:iOS Simulator, id:7766969B-2990-4D98-AD8A-C1BFC1E2C289, OS:16.2, name:iPhone 8 }
+{ platform:iOS Simulator, id:15C3B7F4-3A8B-4920-85FA-DA63A7889D70, OS:16.2, name:iPhone 13 Pro }
+{ platform:iOS Simulator, id:4EA4DB7A-BAB7-4EF9-8EC5-E9218B241763, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:736C6DCD-D4FD-4FF2-9388-9A5ADAE79281, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:750D7A05-F6B2-4F61-8BAB-F9B9C225C2C2, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:86AF0A6B-C4F5-43D5-9408-860E402ED1B8, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:CB581F3F-7E29-4A62-9BED-A2EEB63BB494, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:F69F8287-B90F-4DC8-988C-BCF071C0DCED, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:77C628E0-0404-4F2C-957E-92CEC9FD1B81, OS:16.2, name:iPhone 14 Plus }
+{ platform:iOS Simulator, id:4353B2B5-AF31-4071-BA46-069E7301EC84, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:68D8CA84-6CDC-4883-8AA8-0E142C35EEEC, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:7048C918-92E9-4B39-ADA3-E8FB94D56269, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:B4175E14-AA4F-4F2D-BED5-6C89B5117311, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:BA2F540D-8B7C-4090-90D6-E2C87EFF60E1, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:E4D28F10-BA45-4259-83E0-57606197625C, OS:16.2, name:iPhone 14 Pro Max }
+{ platform:iOS Simulator, id:18DC6F16-98D2-4829-A909-A440F8B763A0, OS:16.2, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:EBA987F5-6A3F-47BC-9FF6-05BC66662964, OS:16.2, name:iphone }
+{ platform:iOS Simulator, id:D3642A8B-F69F-4B7D-8D9A-0BDC91FD9101, OS:16.2, name:l }
+{ platform:iOS Simulator, id:2ED6A51A-2520-43B3-85A9-61380B88E6EB, OS:16.2, name:pianokids }
+{ platform:iOS Simulator, id:885E5A45-C837-4FC3-A1DA-4B64D3ACF24F, OS:16.2, name:pianoo }
+{ platform:iOS Simulator, id:DAC124D2-7BDF-4940-8286-F912F5565C34, OS:16.2, name:rayen }
+{ platform:iOS Simulator, id:25A735B2-CA6E-4A92-8EC4-F8B5F6DF2394, OS:16.2, name:test }
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:00008103-001470D13ED3001E }
+{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+{ platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+{ platform:iOS Simulator, id:B4411A83-FC3C-491F-A0B9-3CD2C7081E04, OS:16.2, name:iPad (10th generation) }
+{ platform:iOS Simulator, id:AF925171-EB08-4D57-BAD4-2D6B384FA7DF, OS:16.2, name:iPad Air (5th generation) }
+{ platform:iOS Simulator, id:B2B545AA-2CA3-4ECE-9F51-FA967F33F0DE, OS:16.2, name:iPad Pro (11-inch) (4th generation) }
+{ platform:iOS Simulator, id:A01C878B-756C-4C39-8434-5B24FFDFA6A9, OS:16.2, name:iPad Pro (12.9-inch) (6th generation) }
+{ platform:iOS Simulator, id:22F0790D-B11E-4E6C-8A75-5A7657DF7D38, OS:16.2, name:iPad mini (6th generation) }
+{ platform:iOS Simulator, id:4BF9364C-7A37-45AB-9D36-7A1118C73290, OS:16.2, name:iPhone 8 }
+{ platform:iOS Simulator, id:7766969B-2990-4D98-AD8A-C1BFC1E2C289, OS:16.2, name:iPhone 8 }
+{ platform:iOS Simulator, id:15C3B7F4-3A8B-4920-85FA-DA63A7889D70, OS:16.2, name:iPhone 13 Pro }
+{ platform:iOS Simulator, id:4EA4DB7A-BAB7-4EF9-8EC5-E9218B241763, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:736C6DCD-D4FD-4FF2-9388-9A5ADAE79281, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:750D7A05-F6B2-4F61-8BAB-F9B9C225C2C2, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:86AF0A6B-C4F5-43D5-9408-860E402ED1B8, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:CB581F3F-7E29-4A62-9BED-A2EEB63BB494, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:F69F8287-B90F-4DC8-988C-BCF071C0DCED, OS:16.2, name:iPhone 14 }
+{ platform:iOS Simulator, id:77C628E0-0404-4F2C-957E-92CEC9FD1B81, OS:16.2, name:iPhone 14 Plus }
+{ platform:iOS Simulator, id:4353B2B5-AF31-4071-BA46-069E7301EC84, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:68D8CA84-6CDC-4883-8AA8-0E142C35EEEC, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:7048C918-92E9-4B39-ADA3-E8FB94D56269, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:B4175E14-AA4F-4F2D-BED5-6C89B5117311, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:BA2F540D-8B7C-4090-90D6-E2C87EFF60E1, OS:16.2, name:iPhone 14 Pro }
+{ platform:iOS Simulator, id:E4D28F10-BA45-4259-83E0-57606197625C, OS:16.2, name:iPhone 14 Pro Max }
+{ platform:iOS Simulator, id:18DC6F16-98D2-4829-A909-A440F8B763A0, OS:16.2, name:iPhone SE (3rd generation) }
+{ platform:iOS Simulator, id:EBA987F5-6A3F-47BC-9FF6-05BC66662964, OS:16.2, name:iphone }
+{ platform:iOS Simulator, id:D3642A8B-F69F-4B7D-8D9A-0BDC91FD9101, OS:16.2, name:l }
+{ platform:iOS Simulator, id:2ED6A51A-2520-43B3-85A9-61380B88E6EB, OS:16.2, name:pianokids }
+{ platform:iOS Simulator, id:885E5A45-C837-4FC3-A1DA-4B64D3ACF24F, OS:16.2, name:pianoo }
+{ platform:iOS Simulator, id:DAC124D2-7BDF-4940-8286-F912F5565C34, OS:16.2, name:rayen }
+{ platform:iOS Simulator, id:25A735B2-CA6E-4A92-8EC4-F8B5F6DF2394, OS:16.2, name:test }
+
+** CLEAN SUCCEEDED **
+
+Prepare packages
+
+Computing target dependency graph and provisioning inputs
+
+Create build description
+Build description signature: f048a1e3aeb65b7d151b7866f6a0cf54
+Build description path: /Users/appleesprit/Library/Developer/Xcode/DerivedData/DarnaApp-bhatnazxokqcycalkwiklqdcuwfk/Build/Intermediates.noindex/XCBuildData/f048a1e3aeb65b7d151b7866f6a0cf54-desc.xcbuild
+
+note: Building targets in dependency order
+/Users/appleesprit/Downloads/yosra abdelkader ios/DarnaApp finam/DarnaApp.xcodeproj: error: Signing for "DarnaApp" requires a development team. Select a development team in the Signing & Capabilities editor. (in target 'DarnaApp' from project 'DarnaApp')
+** BUILD FAILED **
+

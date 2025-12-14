@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-struct UserReviewsListView: View {
+struct ListReviewView: View {
     // Use your global Review model from Review.swift
     var reviews: [Review] = Review.sampleData
     
@@ -92,10 +92,10 @@ struct ReviewCardView: View {
 }
 
 // MARK: - Preview
-struct UserReviewsListView_Previews: PreviewProvider {
+struct ListReviewView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            UserReviewsListView()
+            ListReviewView()
         }
     }
 }
